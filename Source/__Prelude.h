@@ -1,0 +1,14 @@
+#ifndef DVRPL_ENTRY_H // ===========================================================
+#define DVRPL_ENTRY_H
+//+skipreflect
+
+// Includes ========================================================================
+
+#include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Compiler.h"
+#ifdef DVRPL_IMPLEMENTATION
+#endif
+#include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Primitives.h"
+#include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Macros.h"
+
+//-skipreflect
+#endif // DVRPL_ENTRY_H ============================================================
