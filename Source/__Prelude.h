@@ -16,10 +16,10 @@
         #undef WIN32_LEAN_AND_MEAN
     #endif
 
-    #include "Dependencies/Panshilar/Bindings/C/Panshilar.h"
 #endif
 #include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Primitives.h"
 #include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Macros.h"
+#include "Dependencies/Panshilar/Source/Panshilar.h"
 
 //-skipreflect
 #endif // DVRPL_ENTRY_H ============================================================

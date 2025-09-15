@@ -13,6 +13,9 @@ typedef struct DVRPL_Window
     u64 handle;
 } DVRPL_Window;
 
+/**
+ * A cross-platform opaque handle to saved information for a window.
+ */
 typedef struct alignas(PNSLR_PTR_SIZE) DVRPL_SavedWindowData
 {
     u8 buffer[5 * PNSLR_PTR_SIZE];
@@ -37,7 +40,7 @@ typedef struct DVRPL_WindowCreationOptions
     i16          posY;
     u16          sizeX;
     u16          sizeY;
-    cstring      title;
+    utf8str      title;
     DVRPL_Window parent;
     u8           bgColR;
     u8           bgColG;
