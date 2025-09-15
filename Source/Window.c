@@ -29,12 +29,14 @@ static void InitialiseWindowClass(u8 bgColR, u8 bgColG, u8 bgColB, u8 bgColA)
         .cbWndExtra    = 0,
         .hInstance     = hInstance,
         .hIcon         = icon,
-        .hCursor       = LoadCursorW(NULL, IDC_ARROW),
+        .hCursor       = LoadCursorW(NULL, (LPCWSTR) IDC_ARROW),
         .hbrBackground = brush,
         .lpszMenuName  = NULL,
         .lpszClassName = WINDOW_CLASS_NAME,
         .hIconSm       = icon
     };
+
+    G_WindowClassInitialised = RegisterClassExW(&wc) != 0;
 }
 
 #endif
@@ -83,7 +85,7 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
             (LONG) options.posY,
             cW,
             cH,
-            BREAK_WINDOW_HANDLE(options.parent),
+            DVRPL_BREAK_WINDOW_HANDLE(options.parent),
             NULL, NULL, NULL
         );
 
@@ -115,7 +117,7 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
 
 void DVRPL_DestroyWindow(DVRPL_WindowData* window)
 {
-    if (window == nil || window->window.handle == InvalidWindowHandle)
+    if (window == nil || DVRPL_BREAK_WINDOW_HANDLE(window->window) == InvalidWindowHandle)
         return;
 
     #if PNSLR_WINDOWS
@@ -130,7 +132,7 @@ void DVRPL_DestroyWindow(DVRPL_WindowData* window)
 
 b8 DVRPL_SetFullScreen(DVRPL_WindowData* window, b8 status, i16* posX, i16* posY, u16* sizeX, u16* sizeY)
 {
-    if (window == nil || window->window.handle == InvalidWindowHandle)
+    if (window == nil || DVRPL_BREAK_WINDOW_HANDLE(window->window) == InvalidWindowHandle)
         return false;
 
     NativeWindowHandle    windowHandle = DVRPL_BREAK_WINDOW_HANDLE(window->window);
@@ -192,7 +194,7 @@ b8 DVRPL_SetFullScreen(DVRPL_WindowData* window, b8 status, i16* posX, i16* posY
 
 b8 DVRPL_GetWindowDimensions(DVRPL_WindowData* window, i16* posX, i16* posY, u16* sizeX, u16* sizeY)
 {
-    if (window == nil || window->window.handle == InvalidWindowHandle)
+    if (window == nil || DVRPL_BREAK_WINDOW_HANDLE(window->window) == InvalidWindowHandle)
         return false;
 
     i16 x, y;
@@ -223,9 +225,9 @@ b8 DVRPL_GetWindowDimensions(DVRPL_WindowData* window, i16* posX, i16* posY, u16
     return true;
 }
 
-b8 DVRPL_GetPtrPosFromWindow(DVRPL_WindowData* window, i16* posX, i16* posY)
+b8 DVRPL_GetPtrPosFromWindow(DVRPL_Window window, i16* posX, i16* posY)
 {
-    if (window == nil || window->window.handle == InvalidWindowHandle)
+    if (DVRPL_BREAK_WINDOW_HANDLE(window) == InvalidWindowHandle)
         return false;
 
     i16 x, y;
@@ -234,7 +236,7 @@ b8 DVRPL_GetPtrPosFromWindow(DVRPL_WindowData* window, i16* posX, i16* posY)
         POINT p;
         if (!GetCursorPos(&p))
             return false;
-        if (!ScreenToClient(DVRPL_BREAK_WINDOW_HANDLE(window->window), &p))
+        if (!ScreenToClient(DVRPL_BREAK_WINDOW_HANDLE(window), &p))
             return false;
 
         x = (i16) p.x;
@@ -243,13 +245,18 @@ b8 DVRPL_GetPtrPosFromWindow(DVRPL_WindowData* window, i16* posX, i16* posY)
     #else
         #error "Unimplemented."
     #endif
+
+    if (posX) *posX = x;
+    if (posY) *posY = y;
+    return true;
 }
 
 b8 DVRPL_GetPtrPos(i16* posX, i16* posY)
 {
     #if PNSLR_WINDOWS
     {
-        return DVRPL_GetPtrPosFromWindow(GetActiveWindow(), posX, posY);
+        HWND w = GetActiveWindow();
+        return DVRPL_GetPtrPosFromWindow(DVRPL_MAKE_WINDOW_HANDLE(w), posX, posY);
     }
     #else
         #error "Unimplemented."

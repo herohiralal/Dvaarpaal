@@ -85,7 +85,7 @@ b8 DVRPL_GetWindowDimensions(DVRPL_WindowData* window, i16* posX, i16* posY, u16
  * If posX or posY are null, they are ignored, otherwise the corresponding value is written to the provided pointer.
  * Not thread-safe.
  */
-b8 DVRPL_GetPtrPosFromWindow(DVRPL_WindowData* window, i16* posX, i16* posY);
+b8 DVRPL_GetPtrPosFromWindow(DVRPL_Window window, i16* posX, i16* posY);
 
 /**
  * Get the current position of the pointer relative to the screen's top-left corner.
