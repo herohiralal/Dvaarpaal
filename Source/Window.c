@@ -1,0 +1,257 @@
+#define DVRPL_IMPLEMENTATION
+#include "Window.h"
+
+#if PNSLR_WINDOWS
+
+static b8 G_WindowClassInitialised = false;
+static const WCHAR* const WINDOW_CLASS_NAME = L"DVAARPAAL DEFAULT WINDOW CLASS";
+static void InitialiseWindowClass(u8 bgColR, u8 bgColG, u8 bgColB, u8 bgColA)
+{
+    if (G_WindowClassInitialised)
+        return;
+
+    HMODULE hInstance = GetModuleHandleW(NULL);
+    HICON icon = LoadIconW(hInstance, MAKEINTRESOURCEW(2));
+    if (icon == NULL)
+    {
+        WCHAR exePath[260];
+        GetModuleFileNameW(hInstance, exePath, 260);
+        ExtractIconExW(exePath, 0, NULL, &icon, 1);
+    }
+
+    HBRUSH brush = CreateSolidBrush(RGB(bgColR, bgColG, bgColB));
+    WNDCLASSEXW wc =
+    {
+        .cbSize        = sizeof(WNDCLASSEXW),
+        .style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC,
+        .lpfnWndProc   = DefWindowProcW, // TODO: custom wnd proc
+        .cbClsExtra    = 0,
+        .cbWndExtra    = 0,
+        .hInstance     = hInstance,
+        .hIcon         = icon,
+        .hCursor       = LoadCursorW(NULL, IDC_ARROW),
+        .hbrBackground = brush,
+        .lpszMenuName  = NULL,
+        .lpszClassName = WINDOW_CLASS_NAME,
+        .hIconSm       = icon
+    };
+}
+
+#endif
+
+DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
+{
+    #if PNSLR_WINDOWS
+    {
+        InitialiseWindowClass(options.bgColR, options.bgColG, options.bgColB, options.bgColA);
+
+        if (options.posX <= 0 && options.posY <= 0)
+        {
+            RECT workArea;
+            if (SystemParametersInfoW(SPI_GETWORKAREA, 0, &workArea, 0))
+            {
+                options.posX = (i16) workArea.left;
+                options.posY = (i16) workArea.top;
+            }
+            else
+            {
+                options.posX = 15;
+                options.posY = 15;
+            }
+        }
+
+        RECT rect =
+        {
+            .left   = (LONG) options.posX,
+            .top    = (LONG) options.posY,
+            .right  = (LONG) options.sizeX,
+            .bottom = (LONG) options.sizeY
+        };
+        DWORD style = options.parent.handle == 0 ? WS_OVERLAPPEDWINDOW : (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME);
+
+        AdjustWindowRect(&rect, style, FALSE);
+        LONG cW = rect.right - rect.left, cH = rect.bottom - rect.top;
+
+        PNSLR_ArraySlice(PNSLR_U16) title = PNSLR_UTF16FromUTF8WindowsOnly(PNSLR_StringFromCString(options.title), PNSLR_GetAllocator_DefaultHeap());
+
+        HWND output = CreateWindowExW(
+            0,
+            WINDOW_CLASS_NAME,
+            (LPCWSTR) title.data,
+            style,
+            (LONG) options.posX,
+            (LONG) options.posY,
+            cW,
+            cH,
+            BREAK_WINDOW_HANDLE(options.parent),
+            NULL, NULL, NULL
+        );
+
+        PNSLR_FreeSlice(&title, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
+
+        if (output == InvalidWindowHandle) // TODO: handle failure
+            return (DVRPL_WindowData){.window = DVRPL_MAKE_WINDOW_HANDLE(InvalidWindowHandle)};
+
+        UpdateWindow(output);
+        ShowWindow(output, SW_SHOW);
+
+        NativeSavedWindowData savedData =
+        {
+            .rect = rect,
+            .savedStyle = GetWindowLongW(output, GWL_STYLE),
+            .savedExStyle = GetWindowLongW(output, GWL_EXSTYLE),
+        };
+
+        return (DVRPL_WindowData)
+        {
+            .window = DVRPL_MAKE_WINDOW_HANDLE(output),
+            .savedData = DVRPL_MAKE_SAVED_WINDOW_DATA(savedData),
+        };
+    }
+    #else
+        #error "Unimplemented."
+    #endif
+}
+
+void DVRPL_DestroyWindow(DVRPL_WindowData* window)
+{
+    if (window == nil || window->window.handle == InvalidWindowHandle)
+        return;
+
+    #if PNSLR_WINDOWS
+    {
+        DestroyWindow(DVRPL_BREAK_WINDOW_HANDLE(window->window));
+        window->window = DVRPL_MAKE_WINDOW_HANDLE(InvalidWindowHandle);
+    }
+    #else
+        #error "Unimplemented."
+    #endif
+}
+
+b8 DVRPL_SetFullScreen(DVRPL_WindowData* window, b8 status, i16* posX, i16* posY, u16* sizeX, u16* sizeY)
+{
+    if (window == nil || window->window.handle == InvalidWindowHandle)
+        return false;
+
+    NativeWindowHandle    windowHandle = DVRPL_BREAK_WINDOW_HANDLE(window->window);
+    NativeSavedWindowData savedData    = DVRPL_BREAK_SAVED_WINDOW_DATA(window->savedData);
+
+    i16 x, y;
+    u16 w, h;
+    #if PNSLR_WINDOWS
+    {
+        if (status)
+        {
+            LONG savedStyle = GetWindowLongW(windowHandle, GWL_STYLE);
+            LONG savedExStyle = GetWindowLongW(windowHandle, GWL_EXSTYLE);
+
+            SetWindowLongW(windowHandle, GWL_STYLE,   savedStyle   & ~(WS_CAPTION | WS_THICKFRAME));
+            SetWindowLongW(windowHandle, GWL_EXSTYLE, savedExStyle & ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
+
+            HMONITOR    monitor = MonitorFromWindow(windowHandle, MONITOR_DEFAULTTONEAREST);
+            MONITORINFO info    = {.cbSize = sizeof(MONITORINFO)};
+
+            if (!GetMonitorInfoW(monitor, &info))
+                return false;
+
+            GetWindowRect(windowHandle, &savedData.rect);
+            savedData.savedStyle   = savedStyle;
+            savedData.savedExStyle = savedExStyle;
+
+            window->savedData = DVRPL_MAKE_SAVED_WINDOW_DATA(savedData);
+
+            x = (i16) info.rcMonitor.left;
+            y = (i16) info.rcMonitor.top;
+            w = (u16)(info.rcMonitor.right  - info.rcMonitor.left);
+            h = (u16)(info.rcMonitor.bottom - info.rcMonitor.top);
+
+            SetWindowPos(windowHandle, HWND_TOPMOST, (LONG) x, (LONG) y, (LONG) w, (LONG) h, SWP_FRAMECHANGED);
+        }
+        else
+        {
+            SetWindowLongW(windowHandle, GWL_STYLE, savedData.savedStyle);
+            SetWindowLongW(windowHandle, GWL_EXSTYLE, savedData.savedExStyle);
+
+            x = (i16) savedData.rect.left;
+            y = (i16) savedData.rect.top;
+            w = (u16)(savedData.rect.right  - savedData.rect.left);
+            h = (u16)(savedData.rect.bottom - savedData.rect.top);
+            SetWindowPos(windowHandle, HWND_TOPMOST, (LONG) x, (LONG) y, (LONG) w, (LONG) h, SWP_FRAMECHANGED);
+        }
+    }
+    #else
+        #error "Unimplemented."
+    #endif
+
+    if (posX)  *posX  = x;
+    if (posY)  *posY  = y;
+    if (sizeX) *sizeX = w;
+    if (sizeY) *sizeY = h;
+    return true;
+}
+
+b8 DVRPL_GetWindowDimensions(DVRPL_WindowData* window, i16* posX, i16* posY, u16* sizeX, u16* sizeY)
+{
+    if (window == nil || window->window.handle == InvalidWindowHandle)
+        return false;
+
+    i16 x, y;
+    u16 w, h;
+    #if PNSLR_WINDOWS
+    {
+        RECT screenRect;
+        if (!GetWindowRect(DVRPL_BREAK_WINDOW_HANDLE(window->window), &screenRect))
+            return false;
+
+        RECT localRect;
+        if (!GetClientRect(DVRPL_BREAK_WINDOW_HANDLE(window->window), &localRect))
+            return false;
+
+        x = (i16) screenRect.left;
+        y = (i16) screenRect.top;
+        w = (u16) (localRect.right  - localRect.left);
+        h = (u16) (localRect.bottom - localRect.top);
+    }
+    #else
+        #error "Unimplemented."
+    #endif
+
+    if (posX)  *posX  = x;
+    if (posY)  *posY  = y;
+    if (sizeX) *sizeX = w;
+    if (sizeY) *sizeY = h;
+    return true;
+}
+
+b8 DVRPL_GetPtrPosFromWindow(DVRPL_WindowData* window, i16* posX, i16* posY)
+{
+    if (window == nil || window->window.handle == InvalidWindowHandle)
+        return false;
+
+    i16 x, y;
+    #if PNSLR_WINDOWS
+    {
+        POINT p;
+        if (!GetCursorPos(&p))
+            return false;
+        if (!ScreenToClient(DVRPL_BREAK_WINDOW_HANDLE(window->window), &p))
+            return false;
+
+        x = (i16) p.x;
+        y = (i16) p.y;
+    }
+    #else
+        #error "Unimplemented."
+    #endif
+}
+
+b8 DVRPL_GetPtrPos(i16* posX, i16* posY)
+{
+    #if PNSLR_WINDOWS
+    {
+        return DVRPL_GetPtrPosFromWindow(GetActiveWindow(), posX, posY);
+    }
+    #else
+        #error "Unimplemented."
+    #endif
+}
