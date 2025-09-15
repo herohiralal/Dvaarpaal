@@ -121,7 +121,12 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY);
     #define DVRPL_MAKE_WINDOW_HANDLE(h)  ((DVRPL_Window){.handle=*(u64*)&(h)})
 
     #define DVRPL_BREAK_SAVED_WINDOW_DATA(d) (*(NativeSavedWindowData*)&((d).buffer))
-    #define DVRPL_MAKE_SAVED_WINDOW_DATA(d)  ((DVRPL_SavedWindowData){.buffer=*(u8*)&(d)})
+    static forceinline DVRPL_SavedWindowData DVRPL_MAKE_SAVED_WINDOW_DATA(NativeSavedWindowData d)
+    {
+        DVRPL_SavedWindowData result = {0};
+        PNSLR_MemCopy(&result, &d, sizeof(NativeSavedWindowData));
+        return result;
+    }
 #endif
 //-skipreflect
 
