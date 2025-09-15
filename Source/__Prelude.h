@@ -5,6 +5,8 @@
 // Includes ========================================================================
 
 #include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Compiler.h"
+#include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Platforms.h"
+#include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Warnings.h"
 #ifdef DVRPL_IMPLEMENTATION
 #endif
 #include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Primitives.h"
