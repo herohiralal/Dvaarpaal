@@ -3,11 +3,11 @@
 
 #if PNSLR_WINDOWS
 
-static b8 G_WindowClassInitialised = false;
-static const WCHAR* const WINDOW_CLASS_NAME = L"DVAARPAAL DEFAULT WINDOW CLASS";
-static void InitialiseWindowClass(u8 bgColR, u8 bgColG, u8 bgColB, u8 bgColA)
+static b8 G_DVRPL_Internal_WindowClassInitialised = false;
+static const WCHAR* const DVRPL_INTERNAL_WND_CLS_NM = L"DVAARPAAL DEFAULT WINDOW CLASS";
+static void DVRPL_Internal_InitialiseWindowClass(u8 bgColR, u8 bgColG, u8 bgColB, u8 bgColA)
 {
-    if (G_WindowClassInitialised)
+    if (G_DVRPL_Internal_WindowClassInitialised)
         return;
 
     HMODULE hInstance = GetModuleHandleW(NULL);
@@ -32,11 +32,11 @@ static void InitialiseWindowClass(u8 bgColR, u8 bgColG, u8 bgColB, u8 bgColA)
         .hCursor       = LoadCursorW(NULL, (LPCWSTR) IDC_ARROW),
         .hbrBackground = brush,
         .lpszMenuName  = NULL,
-        .lpszClassName = WINDOW_CLASS_NAME,
+        .lpszClassName = DVRPL_INTERNAL_WND_CLS_NM,
         .hIconSm       = icon
     };
 
-    G_WindowClassInitialised = RegisterClassExW(&wc) != 0;
+    G_DVRPL_Internal_WindowClassInitialised = RegisterClassExW(&wc) != 0;
 }
 
 #endif
@@ -45,7 +45,7 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
 {
     #if PNSLR_WINDOWS
     {
-        InitialiseWindowClass(options.bgColR, options.bgColG, options.bgColB, options.bgColA);
+        DVRPL_Internal_InitialiseWindowClass(options.bgColR, options.bgColG, options.bgColB, options.bgColA);
 
         if (options.posX <= 0 && options.posY <= 0)
         {
@@ -78,7 +78,7 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
 
         HWND output = CreateWindowExW(
             0,
-            WINDOW_CLASS_NAME,
+            DVRPL_INTERNAL_WND_CLS_NM,
             (LPCWSTR) title.data,
             style,
             (LONG) options.posX,
