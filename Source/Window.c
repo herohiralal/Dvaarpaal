@@ -74,7 +74,7 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
         AdjustWindowRect(&rect, style, FALSE);
         LONG cW = rect.right - rect.left, cH = rect.bottom - rect.top;
 
-        ArraySlice(u16) title = PNSLR_UTF16FromUTF8WindowsOnly(options.title, PNSLR_GetAllocator_DefaultHeap());
+        PNSLR_ArraySlice(u16) title = PNSLR_UTF16FromUTF8WindowsOnly(options.title, PNSLR_GetAllocator_DefaultHeap());
 
         HWND output = CreateWindowExW(
             0,
@@ -89,7 +89,7 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
             NULL, NULL, NULL
         );
 
-        PNSLR_FreeSlice(&title, PNSLR_GetAllocator_DefaultHeap(), CURRENT_LOC(), nil);
+        PNSLR_FreeSlice(&title, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
 
         if (output == InvalidWindowHandle) // TODO: handle failure
             return (DVRPL_WindowData){.window = DVRPL_MAKE_WINDOW_HANDLE(InvalidWindowHandle)};

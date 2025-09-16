@@ -1,6 +1,7 @@
 #ifndef DVRPL_WINDOW_H // ==========================================================
 #define DVRPL_WINDOW_H
 #include "__Prelude.h"
+EXTERN_C_BEGIN
 
 /**
  * A cross-platform opaque handle to a window.
@@ -133,4 +134,5 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY);
 #endif
 //-skipreflect
 
+EXTERN_C_END
 #endif // DVRPL_WINDOW_H ===========================================================

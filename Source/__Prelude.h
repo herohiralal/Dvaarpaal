@@ -7,6 +7,13 @@
 #include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Compiler.h"
 #include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Platforms.h"
 #include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Warnings.h"
+
+#if PNSLR_WINDOWS
+    #pragma comment(lib, "User32.lib")
+    #pragma comment(lib, "Shell32.lib")
+    #pragma comment(lib, "Gdi32.lib")
+#endif
+
 #ifdef DVRPL_IMPLEMENTATION
 
     #if PNSLR_WINDOWS
