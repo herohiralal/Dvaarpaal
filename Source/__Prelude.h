@@ -26,6 +26,7 @@
 #endif
 #include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Primitives.h"
 #include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Macros.h"
+#include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Collections.h"
 #include "Dependencies/Panshilar/Source/Panshilar.h"
 
 //-skipreflect
