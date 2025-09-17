@@ -1,7 +1,83 @@
 #ifndef DVRPL_INPUT_H // ===========================================================
 #define DVRPL_INPUT_H
 #include "__Prelude.h"
+#include "Window.h"
 EXTERN_C_BEGIN
+
+/**
+ * The type of input event that was logged.
+ */
+ENUM_START(DVRPL_EvtTy, u8)
+    #define DVRPL_EvtTy_Unknown    ((DVRPL_EvtTy) 0)
+    #define DVRPL_EvtTy_Keyboard   ((DVRPL_EvtTy) 1)
+    #define DVRPL_EvtTy_MouseWheel ((DVRPL_EvtTy) 2)
+    #define DVRPL_EvtTy_Touch      ((DVRPL_EvtTy) 3)
+    #define DVRPL_EvtTy_TextInput  ((DVRPL_EvtTy) 4)
+    #define DVRPL_EvtTy_DropFile   ((DVRPL_EvtTy) 5)
+    #define DVRPL_EvtTy_Quit       ((DVRPL_EvtTy) 6)
+ENUM_END
+
+/**
+ * The information regarding a window move event.
+ */
+typedef struct DVRPL_WindowMoveData
+{
+    DVRPL_Window id;
+    i16          posX;
+    i16          posY;
+} DVRPL_WindowMoveData;
+
+/**
+ * The information regarding a window resize event.
+ */
+typedef struct DVRPL_WindowResizeData
+{
+    DVRPL_Window id;
+    u16          sizeX;
+    u16          sizeY;
+} DVRPL_WindowResizeData;
+
+/**
+ * The status of a touch event.
+ */
+ENUM_START(DVRPL_TouchStatus, u8)
+    #define DVRPL_TouchStatus_Moved    ((DVRPL_TouchStatus) 0)
+    #define DVRPL_TouchStatus_Pressed  ((DVRPL_TouchStatus) 1)
+    #define DVRPL_TouchStatus_Released ((DVRPL_TouchStatus) 2)
+ENUM_END
+
+// Technically can just bundle this into `DVRPL_EvtTy` but considering
+// how people usually use input events, first they wanna know  which key
+// it was, and then whether it was pressed or released, not specifically
+// tracking downs/ups and then figuring out which key.
+/**
+ * The status of a key event.
+ */
+ENUM_START(DVRPL_KeyStatus, u8)
+    #define DVRPL_KeyStatus_Pressed  ((DVRPL_KeyStatus) 0)
+    #define DVRPL_KeyStatus_Released ((DVRPL_KeyStatus) 1)
+ENUM_END
+
+/**
+ * The possible states of a key event.
+ */
+ENUM_FLAGS_START(DVRPL_KeyState, u8)
+    #define DVRPL_KeyState_None     ((DVRPL_KeyStateFlags) 0)
+    #define DVRPL_KeyState_Pressed  ((DVRPL_KeyStateFlags) (1ULL << 0))
+    #define DVRPL_KeyState_Held     ((DVRPL_KeyStateFlags) (1ULL << 1))
+    #define DVRPL_KeyState_Released ((DVRPL_KeyStateFlags) (1ULL << 2))
+ENUM_END
+
+/**
+ * Any modifiers that are added to a key event.
+ */
+ENUM_FLAGS_START(DVRPL_KeyModifier, u8)
+    #define DVRPL_KeyModifier_None      ((DVRPL_KeyModifier) 0)
+    #define DVRPL_KeyModifier_Alt       ((DVRPL_KeyModifier) (1ULL << 0))
+    #define DVRPL_KeyModifier_Control   ((DVRPL_KeyModifier) (1ULL << 1))
+    #define DVRPL_KeyModifier_Shift     ((DVRPL_KeyModifier) (1ULL << 2))
+    #define DVRPL_KeyModifier_CmdOrMeta ((DVRPL_KeyModifier) (1ULL << 3))
+ENUM_END
 
 ENUM_START(DVRPL_InputControl, u8)
     #define DVRPL_InputControl_MouseLeft               ((DVRPL_InputControl)   0)
