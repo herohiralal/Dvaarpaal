@@ -72,7 +72,14 @@ void DVRPL_DestroyWindow(DVRPL_WindowData* window);
  * If posX, posY, sizeX or sizeY are null, reasonable defaults are used instead.
  * Not thread-safe.
  */
-b8 DVRPL_SetFullScreen(DVRPL_WindowData* window, b8 status, i16* posX, i16* posY, u16* sizeX, u16* sizeY);
+b8 DVRPL_SetFullScreen(
+    DVRPL_WindowData* window,
+    b8 status,
+    i16* posX OPT_ARG,
+    i16* posY OPT_ARG,
+    u16* sizeX OPT_ARG,
+    u16* sizeY OPT_ARG
+);
 
 /**
  * Gets the window's current position and size.

@@ -62,10 +62,10 @@ ENUM_END
  * The possible states of a key event.
  */
 ENUM_FLAGS_START(DVRPL_KeyState, u8)
-    #define DVRPL_KeyState_None     ((DVRPL_KeyStateFlags) 0)
-    #define DVRPL_KeyState_Pressed  ((DVRPL_KeyStateFlags) (1ULL << 0))
-    #define DVRPL_KeyState_Held     ((DVRPL_KeyStateFlags) (1ULL << 1))
-    #define DVRPL_KeyState_Released ((DVRPL_KeyStateFlags) (1ULL << 2))
+    #define DVRPL_KeyState_None     ((DVRPL_KeyState) 0)
+    #define DVRPL_KeyState_Pressed  ((DVRPL_KeyState) (1ULL << 0))
+    #define DVRPL_KeyState_Held     ((DVRPL_KeyState) (1ULL << 1))
+    #define DVRPL_KeyState_Released ((DVRPL_KeyState) (1ULL << 2))
 ENUM_END
 
 /**
@@ -78,6 +78,88 @@ ENUM_FLAGS_START(DVRPL_KeyModifier, u8)
     #define DVRPL_KeyModifier_Shift     ((DVRPL_KeyModifier) (1ULL << 2))
     #define DVRPL_KeyModifier_CmdOrMeta ((DVRPL_KeyModifier) (1ULL << 3))
 ENUM_END
+
+/**
+ * The code of a key on the keyboard.
+ * Compatible with ASCII for standard keys.
+ */
+ENUM_START(DVRPL_KeyCode, u16)
+    #define DVRPL_KeyCode_Unknown            ((DVRPL_KeyCode)   0)
+    #define DVRPL_KeyCode_Backspace          ((DVRPL_KeyCode)   8)
+    #define DVRPL_KeyCode_Tab                ((DVRPL_KeyCode)   9)
+    #define DVRPL_KeyCode_Enter              ((DVRPL_KeyCode)  13)
+    #define DVRPL_KeyCode_Escape             ((DVRPL_KeyCode)  27)
+    #define DVRPL_KeyCode_Space              ((DVRPL_KeyCode)  32)
+    #define DVRPL_KeyCode_Delete             ((DVRPL_KeyCode) 127)
+    #define DVRPL_KeyCode_ArrowUp            ((DVRPL_KeyCode) 128)
+    #define DVRPL_KeyCode_ArrowDown          ((DVRPL_KeyCode) 129)
+    #define DVRPL_KeyCode_ArrowLeft          ((DVRPL_KeyCode) 130)
+    #define DVRPL_KeyCode_ArrowRight         ((DVRPL_KeyCode) 131)
+    #define DVRPL_KeyCode_PgUp               ((DVRPL_KeyCode) 132)
+    #define DVRPL_KeyCode_PgDown             ((DVRPL_KeyCode) 133)
+    #define DVRPL_KeyCode_Home               ((DVRPL_KeyCode) 134)
+    #define DVRPL_KeyCode_End                ((DVRPL_KeyCode) 135)
+    #define DVRPL_KeyCode_Insert             ((DVRPL_KeyCode) 136)
+    #define DVRPL_KeyCode_Pause              ((DVRPL_KeyCode) 137)
+    #define DVRPL_KeyCode_ScrollLock         ((DVRPL_KeyCode) 138)
+    #define DVRPL_KeyCode_Alt                ((DVRPL_KeyCode) 139)
+    #define DVRPL_KeyCode_Control            ((DVRPL_KeyCode) 140)
+    #define DVRPL_KeyCode_Shift              ((DVRPL_KeyCode) 141)
+    #define DVRPL_KeyCode_Cmd                ((DVRPL_KeyCode) 142)
+    #define DVRPL_KeyCode_Meta               ((DVRPL_KeyCode) 142) // intentionally same as prev
+    #define DVRPL_KeyCode_F1                 ((DVRPL_KeyCode) 143)
+    #define DVRPL_KeyCode_F2                 ((DVRPL_KeyCode) 144)
+    #define DVRPL_KeyCode_F3                 ((DVRPL_KeyCode) 145)
+    #define DVRPL_KeyCode_F4                 ((DVRPL_KeyCode) 146)
+    #define DVRPL_KeyCode_F5                 ((DVRPL_KeyCode) 147)
+    #define DVRPL_KeyCode_F6                 ((DVRPL_KeyCode) 148)
+    #define DVRPL_KeyCode_F7                 ((DVRPL_KeyCode) 149)
+    #define DVRPL_KeyCode_F8                 ((DVRPL_KeyCode) 150)
+    #define DVRPL_KeyCode_F9                 ((DVRPL_KeyCode) 151)
+    #define DVRPL_KeyCode_F10                ((DVRPL_KeyCode) 152)
+    #define DVRPL_KeyCode_F11                ((DVRPL_KeyCode) 153)
+    #define DVRPL_KeyCode_F12                ((DVRPL_KeyCode) 154)
+    #define DVRPL_KeyCode_PrtScrn            ((DVRPL_KeyCode) 167)
+    #define DVRPL_KeyCode_MouseBtnLeft       ((DVRPL_KeyCode) 168)
+    #define DVRPL_KeyCode_MouseBtnMiddle     ((DVRPL_KeyCode) 169)
+    #define DVRPL_KeyCode_MouseBtnRight      ((DVRPL_KeyCode) 170)
+    #define DVRPL_KeyCode_MouseWhlUp         ((DVRPL_KeyCode) 171)
+    #define DVRPL_KeyCode_MouseWhlDown       ((DVRPL_KeyCode) 172)
+    #define DVRPL_KeyCode_GamePad0Bgn        ((DVRPL_KeyCode) 173)
+    #define DVRPL_KeyCode_GamePad0End        ((DVRPL_KeyCode) 205) // bgn + 32 buttons
+    #define DVRPL_KeyCode_GamePad1Bgn        ((DVRPL_KeyCode) 206)
+    #define DVRPL_KeyCode_GamePad1End        ((DVRPL_KeyCode) 238) // bgn + 32 buttons
+    #define DVRPL_KeyCode_GamePad2Bgn        ((DVRPL_KeyCode) 239)
+    #define DVRPL_KeyCode_GamePad2End        ((DVRPL_KeyCode) 271) // bgn + 32 buttons
+    #define DVRPL_KeyCode_GamePad3Bgn        ((DVRPL_KeyCode) 272)
+    #define DVRPL_KeyCode_GamePad3End        ((DVRPL_KeyCode) 304) // bgn + 32 buttons
+    #define DVRPL_KeyCode_Touch              ((DVRPL_KeyCode) 305)
+ENUM_END
+
+/**
+ * An input event that was logged.
+ */
+typedef struct alignas(32) DVRPL_Event
+{
+    DVRPL_EvtTy       ty;            // 8-bits
+    DVRPL_KeyStatus   keyStatus;     // 8-bits
+    DVRPL_KeyModifier keyModifiers;  // 8-bits
+    b8                repeat;        // 8-bits; for keyboard evts
+    DVRPL_KeyCode     keyCode;       // 16-bits
+    u16               textCount;     // 16-bits; for TextInput evts - how many text-input evts were generated after a keyboard evt
+    u32               utf32Char;     // 32-bits; for TextInput evts
+    i32               rawWheelData;  // 32-bits; for MouseWheel evts - unprocessed info
+    i32               wheelData;     // 32-bits; for MouseWheel evts
+    DVRPL_TouchStatus touchStatus;   // 8-bits; for Touch evts
+    u8                touchId;       // 8-bits; for Touch evts - which finger is it
+    u16               droppedFileId; // 16-bits; for DropFile evts - id of the file
+    DVRPL_Window      windowId;      // 64-bits; for Window evts - the id of the window
+} DVRPL_Event;
+
+//+skipreflect
+static_assert( sizeof(DVRPL_Event) == 32, "DVRPL_Event must be exactly 32 bytes in size.");
+static_assert(alignof(DVRPL_Event) == 32, "DVRPL_Event must be 32-byte aligned.");
+//-skipreflect
 
 ENUM_START(DVRPL_InputControl, u8)
     #define DVRPL_InputControl_MouseLeft               ((DVRPL_InputControl)   0)
