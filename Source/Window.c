@@ -98,6 +98,9 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
         UpdateWindow(output);
         ShowWindow(output, SW_SHOW);
 
+        if (options.acceptDropFiles)
+            DragAcceptFiles(output, TRUE);
+
         NativeSavedWindowData savedData =
         {
             .rect = rect,

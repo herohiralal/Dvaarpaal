@@ -48,6 +48,7 @@ typedef struct DVRPL_WindowCreationOptions
     u8           bgColB;
     u8           bgColA;
     b8           msaa;
+    b8           acceptDropFiles;
 } DVRPL_WindowCreationOptions;
 
 /**
