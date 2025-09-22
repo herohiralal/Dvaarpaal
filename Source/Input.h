@@ -27,6 +27,8 @@ typedef struct DVRPL_WindowMoveData
     i16          posY;
 } DVRPL_WindowMoveData;
 
+PNSLR_DECLARE_ARRAY_SLICE(DVRPL_WindowMoveData);
+
 /**
  * The information regarding a window resize event.
  */
@@ -36,6 +38,8 @@ typedef struct DVRPL_WindowResizeData
     u16          sizeX;
     u16          sizeY;
 } DVRPL_WindowResizeData;
+
+PNSLR_DECLARE_ARRAY_SLICE(DVRPL_WindowResizeData);
 
 /**
  * The status of a touch event.
@@ -134,6 +138,7 @@ ENUM_START(DVRPL_KeyCode, u16)
     #define DVRPL_KeyCode_GamePad3Bgn        ((DVRPL_KeyCode) 272)
     #define DVRPL_KeyCode_GamePad3End        ((DVRPL_KeyCode) 304) // bgn + 32 buttons
     #define DVRPL_KeyCode_Touch              ((DVRPL_KeyCode) 305)
+    #define DVRPL_KeyCode_NUM                ((DVRPL_KeyCode) 306)
 ENUM_END
 
 /**
@@ -156,120 +161,89 @@ typedef struct alignas(32) DVRPL_Event
     DVRPL_Window      windowId;      // 64-bits; for Window evts - the id of the window
 } DVRPL_Event;
 
+PNSLR_DECLARE_ARRAY_SLICE(DVRPL_Event);
+
 //+skipreflect
 static_assert( sizeof(DVRPL_Event) == 32, "DVRPL_Event must be exactly 32 bytes in size.");
 static_assert(alignof(DVRPL_Event) == 32, "DVRPL_Event must be 32-byte aligned.");
 //-skipreflect
 
-ENUM_START(DVRPL_InputControl, u8)
-    #define DVRPL_InputControl_MouseLeft               ((DVRPL_InputControl)   0)
-    #define DVRPL_InputControl_MouseRight              ((DVRPL_InputControl)   1)
-    #define DVRPL_InputControl_MouseMiddle             ((DVRPL_InputControl)   2)
-    #define DVRPL_InputControl_Mouse4                  ((DVRPL_InputControl)   3)
-    #define DVRPL_InputControl_Mouse5                  ((DVRPL_InputControl)   4)
-    #define DVRPL_InputControl_Mouse6                  ((DVRPL_InputControl)   5)
-    #define DVRPL_InputControl_Mouse7                  ((DVRPL_InputControl)   6)
-    #define DVRPL_InputControl_MouseX                  ((DVRPL_InputControl)   7)
-    #define DVRPL_InputControl_MouseY                  ((DVRPL_InputControl)   8)
-    #define DVRPL_InputControl_MouseWheel              ((DVRPL_InputControl)   9)
-    #define DVRPL_InputControl_Backtick                ((DVRPL_InputControl)  10)
-    #define DVRPL_InputControl_One                     ((DVRPL_InputControl)  11)
-    #define DVRPL_InputControl_Two                     ((DVRPL_InputControl)  12)
-    #define DVRPL_InputControl_Three                   ((DVRPL_InputControl)  13)
-    #define DVRPL_InputControl_Four                    ((DVRPL_InputControl)  14)
-    #define DVRPL_InputControl_Five                    ((DVRPL_InputControl)  15)
-    #define DVRPL_InputControl_Six                     ((DVRPL_InputControl)  16)
-    #define DVRPL_InputControl_Seven                   ((DVRPL_InputControl)  17)
-    #define DVRPL_InputControl_Eight                   ((DVRPL_InputControl)  18)
-    #define DVRPL_InputControl_Nine                    ((DVRPL_InputControl)  19)
-    #define DVRPL_InputControl_Zero                    ((DVRPL_InputControl)  20)
-    #define DVRPL_InputControl_Minus                   ((DVRPL_InputControl)  21)
-    #define DVRPL_InputControl_Equals                  ((DVRPL_InputControl)  22)
-    #define DVRPL_InputControl_Backspace               ((DVRPL_InputControl)  23)
-    #define DVRPL_InputControl_Tab                     ((DVRPL_InputControl)  24)
-    #define DVRPL_InputControl_Q                       ((DVRPL_InputControl)  25)
-    #define DVRPL_InputControl_W                       ((DVRPL_InputControl)  26)
-    #define DVRPL_InputControl_E                       ((DVRPL_InputControl)  27)
-    #define DVRPL_InputControl_R                       ((DVRPL_InputControl)  28)
-    #define DVRPL_InputControl_T                       ((DVRPL_InputControl)  29)
-    #define DVRPL_InputControl_Y                       ((DVRPL_InputControl)  30)
-    #define DVRPL_InputControl_U                       ((DVRPL_InputControl)  31)
-    #define DVRPL_InputControl_I                       ((DVRPL_InputControl)  32)
-    #define DVRPL_InputControl_O                       ((DVRPL_InputControl)  33)
-    #define DVRPL_InputControl_P                       ((DVRPL_InputControl)  34)
-    #define DVRPL_InputControl_SquareBracketLeft       ((DVRPL_InputControl)  35)
-    #define DVRPL_InputControl_SquareBracketRight      ((DVRPL_InputControl)  36)
-    #define DVRPL_InputControl_Backslash               ((DVRPL_InputControl)  37)
-    #define DVRPL_InputControl_A                       ((DVRPL_InputControl)  38)
-    #define DVRPL_InputControl_S                       ((DVRPL_InputControl)  39)
-    #define DVRPL_InputControl_D                       ((DVRPL_InputControl)  40)
-    #define DVRPL_InputControl_F                       ((DVRPL_InputControl)  41)
-    #define DVRPL_InputControl_G                       ((DVRPL_InputControl)  42)
-    #define DVRPL_InputControl_H                       ((DVRPL_InputControl)  43)
-    #define DVRPL_InputControl_J                       ((DVRPL_InputControl)  44)
-    #define DVRPL_InputControl_K                       ((DVRPL_InputControl)  45)
-    #define DVRPL_InputControl_L                       ((DVRPL_InputControl)  46)
-    #define DVRPL_InputControl_Semicolon               ((DVRPL_InputControl)  47)
-    #define DVRPL_InputControl_Apostrophe              ((DVRPL_InputControl)  48)
-    #define DVRPL_InputControl_Enter                   ((DVRPL_InputControl)  49)
-    #define DVRPL_InputControl_LeftShift               ((DVRPL_InputControl)  50)
-    #define DVRPL_InputControl_Z                       ((DVRPL_InputControl)  51)
-    #define DVRPL_InputControl_X                       ((DVRPL_InputControl)  52)
-    #define DVRPL_InputControl_C                       ((DVRPL_InputControl)  53)
-    #define DVRPL_InputControl_V                       ((DVRPL_InputControl)  54)
-    #define DVRPL_InputControl_B                       ((DVRPL_InputControl)  55)
-    #define DVRPL_InputControl_N                       ((DVRPL_InputControl)  56)
-    #define DVRPL_InputControl_M                       ((DVRPL_InputControl)  57)
-    #define DVRPL_InputControl_Comma                   ((DVRPL_InputControl)  58)
-    #define DVRPL_InputControl_FullStop                ((DVRPL_InputControl)  59)
-    #define DVRPL_InputControl_Slash                   ((DVRPL_InputControl)  60)
-    #define DVRPL_InputControl_RightShift              ((DVRPL_InputControl)  61)
-    #define DVRPL_InputControl_LeftControl             ((DVRPL_InputControl)  62)
-    #define DVRPL_InputControl_LeftAlt                 ((DVRPL_InputControl)  63)
-    #define DVRPL_InputControl_Space                   ((DVRPL_InputControl)  64)
-    #define DVRPL_InputControl_RightAlt                ((DVRPL_InputControl)  65)
-    #define DVRPL_InputControl_RightControl            ((DVRPL_InputControl)  66)
-    #define DVRPL_InputControl_Up                      ((DVRPL_InputControl)  67)
-    #define DVRPL_InputControl_Down                    ((DVRPL_InputControl)  68)
-    #define DVRPL_InputControl_Left                    ((DVRPL_InputControl)  69)
-    #define DVRPL_InputControl_Right                   ((DVRPL_InputControl)  70)
-    #define DVRPL_InputControl_Numpad0                 ((DVRPL_InputControl)  71)
-    #define DVRPL_InputControl_Numpad1                 ((DVRPL_InputControl)  72)
-    #define DVRPL_InputControl_Numpad2                 ((DVRPL_InputControl)  73)
-    #define DVRPL_InputControl_Numpad3                 ((DVRPL_InputControl)  74)
-    #define DVRPL_InputControl_Numpad4                 ((DVRPL_InputControl)  75)
-    #define DVRPL_InputControl_Numpad5                 ((DVRPL_InputControl)  76)
-    #define DVRPL_InputControl_Numpad6                 ((DVRPL_InputControl)  77)
-    #define DVRPL_InputControl_Numpad7                 ((DVRPL_InputControl)  78)
-    #define DVRPL_InputControl_Numpad8                 ((DVRPL_InputControl)  79)
-    #define DVRPL_InputControl_Numpad9                 ((DVRPL_InputControl)  80)
-    #define DVRPL_InputControl_NumpadDivide            ((DVRPL_InputControl)  81)
-    #define DVRPL_InputControl_NumpadMultiply          ((DVRPL_InputControl)  82)
-    #define DVRPL_InputControl_NumpadMinus             ((DVRPL_InputControl)  83)
-    #define DVRPL_InputControl_NumpadPlus              ((DVRPL_InputControl)  84)
-    #define DVRPL_InputControl_NumpadEnter             ((DVRPL_InputControl)  85)
-    #define DVRPL_InputControl_NumpadDecimal           ((DVRPL_InputControl)  86)
-    #define DVRPL_InputControl_GamepadLeftShoulder     ((DVRPL_InputControl)  87)
-    #define DVRPL_InputControl_GamepadLeftTrigger      ((DVRPL_InputControl)  88)
-    #define DVRPL_InputControl_GamepadRightShoulder    ((DVRPL_InputControl)  89)
-    #define DVRPL_InputControl_GamepadRightTrigger     ((DVRPL_InputControl)  90)
-    #define DVRPL_InputControl_GamepadSelect           ((DVRPL_InputControl)  91)
-    #define DVRPL_InputControl_GamepadStart            ((DVRPL_InputControl)  92)
-    #define DVRPL_InputControl_GamepadLeftThumbstick   ((DVRPL_InputControl)  93)
-    #define DVRPL_InputControl_GamepadLeftThumbstickX  ((DVRPL_InputControl)  94)
-    #define DVRPL_InputControl_GamepadLeftThumbstickY  ((DVRPL_InputControl)  95)
-    #define DVRPL_InputControl_GamepadRightThumbstick  ((DVRPL_InputControl)  96)
-    #define DVRPL_InputControl_GamepadRightThumbstickX ((DVRPL_InputControl)  97)
-    #define DVRPL_InputControl_GamepadRightThumbstickY ((DVRPL_InputControl)  98)
-    #define DVRPL_InputControl_GamepadDPadUp           ((DVRPL_InputControl)  99)
-    #define DVRPL_InputControl_GamepadDPadDown         ((DVRPL_InputControl) 100)
-    #define DVRPL_InputControl_GamepadDPadLeft         ((DVRPL_InputControl) 101)
-    #define DVRPL_InputControl_GamepadDPadRight        ((DVRPL_InputControl) 102)
-    #define DVRPL_InputControl_GamepadFaceButtonTop    ((DVRPL_InputControl) 103)
-    #define DVRPL_InputControl_GamepadFaceButtonBottom ((DVRPL_InputControl) 104)
-    #define DVRPL_InputControl_GamepadFaceButtonLeft   ((DVRPL_InputControl) 105)
-    #define DVRPL_InputControl_GamepadFaceButtonRight  ((DVRPL_InputControl) 106)
-ENUM_END
+/**
+ * Gather all input events for this frame.
+ * Must be called once per frame before accessing events.
+ * Clears previous frame's events and processes new Windows messages.
+ * Requires a temp allocator to store a bunch of temporary stuff.
+ * Not thread-safe.
+ */
+void DVRPL_GatherEvents(PNSLR_Allocator tempAllocator);
+
+/**
+ * Get all events that were gathered this frame.
+ * Returns a slice of events that is valid until the next call to DVRPL_GatherEvents.
+ * Not thread-safe.
+ */
+PNSLR_ArraySlice(DVRPL_Event) DVRPL_GetEvents(void);
+
+/**
+ * Iterate across window resize events.
+ * Automatically cleans up the internal resources when iteration is over.
+ * Use in a `while` loop, ideally.
+ * Not thread-safe.
+ */
+b8 DVRPL_IterateResizeEvent(i32* iterator, DVRPL_WindowResizeData* val OPT_ARG);
+
+/**
+ * Iterate across window move events.
+ * Automatically cleans up the internal resources when iteration is over.
+ * Use in a `while` loop, ideally.
+ * Not thread-safe.
+ */
+b8 DVRPL_IterateMoveEvent(i32* iterator, DVRPL_WindowMoveData* val OPT_ARG);
+
+/**
+ * Get the current state of a key.
+ * Returns a bitmask indicating if the key is pressed, held, or released this frame.
+ * Not thread-safe.
+ */
+DVRPL_KeyState DVRPL_GetKeyState(DVRPL_KeyCode key);
+
+/**
+ * Get the mouse movement delta for this frame.
+ * Sets the provided pointers to the delta values (can pass NULL to ignore).
+ * deltaX, deltaY are relative mouse movement, deltaScroll is scroll wheel delta.
+ * Not thread-safe.
+ */
+void DVRPL_GetMouseDelta(
+    i32* deltaX      OPT_ARG,
+    i32* deltaY      OPT_ARG,
+    i32* deltaScroll OPT_ARG
+);
+
+/**
+ * Check if the application currently has focus.
+ * Returns true if the application has focus, false otherwise.
+ * Not thread-safe.
+ */
+b8 DVRPL_DoesApplicationHaveFocus(void);
+
+/**
+ * Get a dropped file path by its ID.
+ * The fileId comes from a DropFile event's droppedFileId field.
+ * Returns an empty string if the ID is invalid.
+ * The returned string is valid until the next call to DVRPL_GatherEvents.
+ * Not thread-safe.
+ */
+utf8str DVRPL_GetDroppedFile(u16 fileId);
+
+//+skipreflect
+#ifdef DVRPL_IMPLEMENTATION
+
+    #if PNSLR_WINDOWS
+        static LRESULT CALLBACK DVRPL_Internal_WindowsInputCallback(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    #endif
+
+#endif
+//-skipreflect
 
 EXTERN_C_END
 #endif // DVRPL_INPUT_H ============================================================

@@ -1,5 +1,6 @@
 #define DVRPL_IMPLEMENTATION
 #include "Window.h"
+#include "Input.h"
 
 #if PNSLR_WINDOWS
 
@@ -24,7 +25,7 @@ static void DVRPL_Internal_InitialiseWindowClass(u8 bgColR, u8 bgColG, u8 bgColB
     {
         .cbSize        = sizeof(WNDCLASSEXW),
         .style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC,
-        .lpfnWndProc   = DefWindowProcW, // TODO: custom wnd proc
+        .lpfnWndProc   = DVRPL_Internal_WindowsInputCallback,
         .cbClsExtra    = 0,
         .cbWndExtra    = 0,
         .hInstance     = hInstance,

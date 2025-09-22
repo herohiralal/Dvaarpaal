@@ -6,6 +6,7 @@
 #include "__Prelude.h"
 
 #include "Window.c"
+#include "Input.c"
 #include "EntryPoint.c"
 
 #include "Dependencies/Panshilar/Source/zzzz_Unity.c"

@@ -2,31 +2,10 @@
 #define DVRPL_ENTRY_H
 //+skipreflect
 
-// Includes ========================================================================
-
-#include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Compiler.h"
-#include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Platforms.h"
-#include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Warnings.h"
-
-#if PNSLR_WINDOWS
-    #pragma comment(lib, "User32.lib")
-    #pragma comment(lib, "Shell32.lib")
-    #pragma comment(lib, "Gdi32.lib")
-#endif
-
 #ifdef DVRPL_IMPLEMENTATION
-
-    #if PNSLR_WINDOWS
-        #define WIN32_LEAN_AND_MEAN
-        #include <Windows.h>
-        #include <shellapi.h>
-        #undef WIN32_LEAN_AND_MEAN
-    #endif
-
+    #include "__PrivateIncludes.h"
 #endif
-#include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Primitives.h"
-#include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Macros.h"
-#include "Dependencies/Panshilar/Source/Dependencies/PNSLR_Intrinsics/Collections.h"
+
 #include "Dependencies/Panshilar/Source/Panshilar.h"
 
 //-skipreflect
