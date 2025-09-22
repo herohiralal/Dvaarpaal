@@ -6,17 +6,16 @@
 
 static b8 G_DVRPL_Internal_WindowClassInitialised = false;
 static const WCHAR* const DVRPL_INTERNAL_WND_CLS_NM = L"DVAARPAAL DEFAULT WINDOW CLASS";
-static void DVRPL_Internal_InitialiseWindowClass(u8 bgColR, u8 bgColG, u8 bgColB, u8 bgColA)
+static void DVRPL_Internal_InitialiseWindowClass(DVRPL_App app, u8 bgColR, u8 bgColG, u8 bgColB, u8 bgColA)
 {
     if (G_DVRPL_Internal_WindowClassInitialised)
         return;
 
-    HMODULE hInstance = GetModuleHandleW(NULL);
-    HICON icon = LoadIconW(hInstance, MAKEINTRESOURCEW(2));
+    HICON icon = LoadIconW(DVRPL_BREAK_APP_HANDLE(app), MAKEINTRESOURCEW(2));
     if (icon == NULL)
     {
         WCHAR exePath[260];
-        GetModuleFileNameW(hInstance, exePath, 260);
+        GetModuleFileNameW(DVRPL_BREAK_APP_HANDLE(app), exePath, 260);
         ExtractIconExW(exePath, 0, NULL, &icon, 1);
     }
 
@@ -28,7 +27,7 @@ static void DVRPL_Internal_InitialiseWindowClass(u8 bgColR, u8 bgColG, u8 bgColB
         .lpfnWndProc   = DVRPL_Internal_WindowsInputCallback,
         .cbClsExtra    = 0,
         .cbWndExtra    = 0,
-        .hInstance     = hInstance,
+        .hInstance     = DVRPL_BREAK_APP_HANDLE(app),
         .hIcon         = icon,
         .hCursor       = LoadCursorW(NULL, (LPCWSTR) IDC_ARROW),
         .hbrBackground = brush,
@@ -46,7 +45,7 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
 {
     #if PNSLR_WINDOWS
     {
-        DVRPL_Internal_InitialiseWindowClass(options.bgColR, options.bgColG, options.bgColB, options.bgColA);
+        DVRPL_Internal_InitialiseWindowClass(options.app, options.bgColR, options.bgColG, options.bgColB, options.bgColA);
 
         if (options.posX <= 0 && options.posY <= 0)
         {
@@ -114,6 +113,22 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
             .savedData = DVRPL_MAKE_SAVED_WINDOW_DATA(savedData),
         };
     }
+    #elif PNSLR_ANDROID
+    {
+        NativeAppHandle h = DVRPL_BREAK_APP_HANDLE(options.app);
+        if (h)
+        {
+            return (DVRPL_WindowData)
+            {
+                .window    = DVRPL_MAKE_WINDOW_HANDLE((h->window)),
+                .savedData = DVRPL_MAKE_SAVED_WINDOW_DATA((NativeSavedWindowData){.app = h}),
+            };
+        }
+        else
+        {
+            return (DVRPL_WindowData) {0};
+        }
+    }
     #else
         #error "Unimplemented."
     #endif
@@ -128,6 +143,10 @@ void DVRPL_DestroyWindow(DVRPL_WindowData* window)
     {
         DestroyWindow(DVRPL_BREAK_WINDOW_HANDLE(window->window));
         window->window = DVRPL_MAKE_WINDOW_HANDLE(InvalidWindowHandle);
+    }
+    #elif PNSLR_ANDROID
+    {
+        // no-op
     }
     #else
         #error "Unimplemented."
@@ -185,6 +204,13 @@ b8 DVRPL_SetFullScreen(DVRPL_WindowData* window, b8 status, i16* posX, i16* posY
             SetWindowPos(windowHandle, HWND_TOPMOST, (LONG) x, (LONG) y, (LONG) w, (LONG) h, SWP_FRAMECHANGED);
         }
     }
+    #elif PNSLR_ANDROID
+    {
+        if (status) ANativeActivity_setWindowFlags(savedData.app->activity, AWINDOW_FLAG_FULLSCREEN, 0);
+        else        ANativeActivity_setWindowFlags(savedData.app->activity, 0, AWINDOW_FLAG_FULLSCREEN);
+
+        DVRPL_GetWindowDimensions(window, &x, &y, &w, &h);
+    }
     #else
         #error "Unimplemented."
     #endif
@@ -218,6 +244,12 @@ b8 DVRPL_GetWindowDimensions(DVRPL_WindowData* window, i16* posX, i16* posY, u16
         w = (u16) (localRect.right  - localRect.left);
         h = (u16) (localRect.bottom - localRect.top);
     }
+    #elif PNSLR_ANDROID
+    {
+        x = y = 0;
+        w = (u16) ANativeWindow_getWidth(DVRPL_BREAK_WINDOW_HANDLE(window->window));
+        h = (u16) ANativeWindow_getHeight(DVRPL_BREAK_WINDOW_HANDLE(window->window));
+    }
     #else
         #error "Unimplemented."
     #endif
@@ -246,6 +278,10 @@ b8 DVRPL_GetPtrPosFromWindow(DVRPL_Window window, i16* posX, i16* posY)
         x = (i16) p.x;
         y = (i16) p.y;
     }
+    #elif PNSLR_ANDROID
+    {
+        return false; // TODO: implement
+    }
     #else
         #error "Unimplemented."
     #endif
@@ -261,6 +297,10 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY)
     {
         HWND w = GetActiveWindow();
         return DVRPL_GetPtrPosFromWindow(DVRPL_MAKE_WINDOW_HANDLE(w), posX, posY);
+    }
+    #elif PNSLR_ANDROID
+    {
+        return false; // TODO: implement
     }
     #else
         #error "Unimplemented."

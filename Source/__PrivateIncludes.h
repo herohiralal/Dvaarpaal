@@ -18,6 +18,11 @@ PNSLR_SUPPRESS_WARN
     #undef WIN32_LEAN_AND_MEAN
 #endif
 
+#if PNSLR_ANDROID
+    #include <android_native_app_glue.h>
+    #include <android/window.h>
+#endif
+
 PNSLR_UNSUPPRESS_WARN
 
 #endif//DVRPL_PRIVATE_INCLUDES_H

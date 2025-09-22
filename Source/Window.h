@@ -3,6 +3,11 @@
 #include "__Prelude.h"
 EXTERN_C_BEGIN
 
+typedef struct DVRPL_App
+{
+    u64 handle;
+} DVRPL_App;
+
 /**
  * A cross-platform opaque handle to a window.
  * On Windows, this is an HWND.
@@ -37,6 +42,7 @@ typedef struct DVRPL_WindowData
  */
 typedef struct DVRPL_WindowCreationOptions
 {
+    DVRPL_App    app;
     i16          posX;
     i16          posY;
     u16          sizeX;
@@ -110,6 +116,7 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY);
 //+skipreflect
 #ifdef DVRPL_IMPLEMENTATION
     #if PNSLR_WINDOWS
+        typedef HINSTANCE NativeAppHandle;
         typedef HWND NativeWindowHandle;
         static const NativeWindowHandle InvalidWindowHandle = NULL;
 
@@ -119,15 +126,30 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY);
             LONG savedStyle;
             LONG savedExStyle;
         } NativeSavedWindowData;
+    #elif PNSLR_ANDROID
+        typedef struct android_app* NativeAppHandle;
+        typedef ANativeWindow* NativeWindowHandle;
+        static const NativeWindowHandle InvalidWindowHandle = nil;
+
+        typedef struct
+        {
+            NativeAppHandle app;
+        } NativeSavedWindowData;
     #else
         #error "Unimplemented."
     #endif
+
+    static_assert(sizeof(DVRPL_App)  == sizeof(NativeAppHandle),  "DVRPL_App and NativeAppHandle must have the same size.");
+    static_assert(alignof(DVRPL_App) == alignof(NativeAppHandle), "DVRPL_App and NativeAppHandle must have the same alignment.");
 
     static_assert(sizeof(DVRPL_Window)  == sizeof(NativeWindowHandle),  "DVRPL_Window and NativeWindowHandle must have the same size.");
     static_assert(alignof(DVRPL_Window) == alignof(NativeWindowHandle), "DVRPL_Window and NativeWindowHandle must have the same alignment.");
 
     static_assert(sizeof(DVRPL_SavedWindowData)  >= sizeof(NativeSavedWindowData),  "DVRPL_SavedWindowData must be large   enough to hold NativeSavedWindowData.");
     static_assert(alignof(DVRPL_SavedWindowData) >= alignof(NativeSavedWindowData), "DVRPL_SavedWindowData must be aligned enough to hold NativeSavedWindowData.");
+
+    #define DVRPL_BREAK_APP_HANDLE(h) (*(NativeAppHandle*)&((h).handle))
+    #define DVRPL_MAKE_APP_HANDLE(h)  ((DVRPL_App){.handle=*(u64*)&(h)})
 
     #define DVRPL_BREAK_WINDOW_HANDLE(h) (*(NativeWindowHandle*)&((h).handle))
     #define DVRPL_MAKE_WINDOW_HANDLE(h)  ((DVRPL_Window){.handle=*(u64*)&(h)})

@@ -24,7 +24,7 @@
 
             LocalFree(argv);
 
-            i32 returnCode = DVRPL_Main(args);
+            i32 returnCode = DVRPL_Main(DVRPL_MAKE_APP_HANDLE(hInstance), args);
             for (i32 i = 0; i < argc; i++) PNSLR_FreeString(args.data[i], PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
             PNSLR_FreeSlice(&args, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
 
@@ -59,7 +59,7 @@
                 if (!args.data[i].data || !args.data[i].count) return -1;
             }
 
-            i32 returnCode = DVRPL_Main(args);
+            i32 returnCode = DVRPL_Main((DVRPL_App) {0}, args);
             for (i32 i = 0; i < argc; i++) PNSLR_FreeString(args.data[i], PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
             PNSLR_FreeSlice(&args, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
 
