@@ -11,6 +11,20 @@ static i64                                      G_DVRPL_Internal_NumTempResizes 
 static PNSLR_ArraySlice(DVRPL_WindowMoveData)   G_DVRPL_Internal_TempMoves            = {0};
 static i64                                      G_DVRPL_Internal_NumTempMoves         = {0};
 
+// private platform-specific globals ===============================================
+
+#if PNSLR_WINDOWS
+
+static PNSLR_ArraySlice(u8)  G_DVRPL_Internal_RawInputBuffer         = {0};
+static i64                   G_DVRPL_Internal_NumRawInputBuffer      = 0;
+static b8                    G_DVRPL_Internal_WindowMinimised        = false;
+static DVRPL_KeyModifier     G_DVRPL_Internal_CachedModifierStates   = DVRPL_KeyModifier_None;
+static PNSLR_ArraySlice(i32) G_DVRPL_Internal_KeysDown               = {0}; // acts as a set
+static i64                   G_DVRPL_Internal_NumKeysDown            = 0;
+static b8                    G_DVRPL_Internal_InputSystemInitialised = false;
+
+#endif
+
 // public platform-unspecific globals ==============================================
 
 static PNSLR_ArraySlice(DVRPL_Event) G_DVRPL_Internal_Events                              = {0};
@@ -30,15 +44,57 @@ static void DVRPL_Internal_ResizeEventsIfBufferFull(void)
     }
 }
 
-#if PNSLR_WINDOWS
+static void DVRPL_Internal_ClearExistingInputData(void)
+{
+    if (G_DVRPL_Internal_TempDroppedFiles.data != nil)
+    {
+        for (i64 i = 0; i < G_DVRPL_Internal_NumTempDroppedFiles; i++)
+            PNSLR_FreeString(
+                G_DVRPL_Internal_TempDroppedFiles.data[i],
+                G_DVRPL_Internal_CurrentTempAllocator,
+                PNSLR_GET_LOC(),
+                nil
+            );
 
-static PNSLR_ArraySlice(u8)  G_DVRPL_Internal_RawInputBuffer         = {0};
-static i64                   G_DVRPL_Internal_NumRawInputBuffer      = 0;
-static b8                    G_DVRPL_Internal_WindowMinimised        = false;
-static DVRPL_KeyModifier     G_DVRPL_Internal_CachedModifierStates   = DVRPL_KeyModifier_None;
-static PNSLR_ArraySlice(i32) G_DVRPL_Internal_KeysDown               = {0}; // acts as a set
-static i64                   G_DVRPL_Internal_NumKeysDown            = 0;
-static b8                    G_DVRPL_Internal_InputSystemInitialised = false;
+        PNSLR_FreeSlice(
+            &G_DVRPL_Internal_TempDroppedFiles,
+            G_DVRPL_Internal_CurrentTempAllocator,
+            PNSLR_GET_LOC(),
+            nil
+        );
+
+        G_DVRPL_Internal_TempDroppedFiles = (PNSLR_ArraySlice(utf8str)) {0};
+        G_DVRPL_Internal_NumTempDroppedFiles = 0;
+    }
+
+    #if PNSLR_WINDOWS
+        G_DVRPL_Internal_NumRawInputBuffer = 0;
+    #endif
+
+    G_DVRPL_Internal_NumEvents = 0;
+
+    {
+        i32 resizeIt = 0, moveIt = 0;
+        while (DVRPL_IterateResizeEvent(&resizeIt, nil)) { }
+        while (DVRPL_IterateMoveEvent  (&moveIt,   nil)) { }
+    }
+
+    // Clear key states
+    for (i32 i = 0; i < (i32)(DVRPL_KeyCode_NUM); i++)
+    {
+        DVRPL_KeyState* curr = &(G_DVRPL_Internal_KeyStates[i]);
+
+        if ((*curr) & DVRPL_KeyState_Released)
+            (*curr) &= ~(DVRPL_KeyState_Released | DVRPL_KeyState_Pressed | DVRPL_KeyState_Held);
+        else
+            (*curr) &= ~(DVRPL_KeyState_Pressed);
+    }
+
+    // Clear mouse delta
+    G_DVRPL_Internal_MouseDelta[0] = G_DVRPL_Internal_MouseDelta[1] = G_DVRPL_Internal_MouseDelta[2] = 0;
+}
+
+#if PNSLR_WINDOWS
 
 static DVRPL_KeyCode DVRPL_Internal_GetKeyCode(i32 vKey)
 {
@@ -197,53 +253,6 @@ static b8 DVRPL_Internal_InitialiseInputSystem(void)
 
     G_DVRPL_Internal_InputSystemInitialised = true;
     return true;
-}
-
-static void DVRPL_Internal_ClearExistingInputData(void)
-{
-    if (G_DVRPL_Internal_TempDroppedFiles.data != nil)
-    {
-        for (i64 i = 0; i < G_DVRPL_Internal_NumTempDroppedFiles; i++)
-            PNSLR_FreeString(
-                G_DVRPL_Internal_TempDroppedFiles.data[i],
-                G_DVRPL_Internal_CurrentTempAllocator,
-                PNSLR_GET_LOC(),
-                nil
-            );
-
-        PNSLR_FreeSlice(
-            &G_DVRPL_Internal_TempDroppedFiles,
-            G_DVRPL_Internal_CurrentTempAllocator,
-            PNSLR_GET_LOC(),
-            nil
-        );
-
-        G_DVRPL_Internal_TempDroppedFiles = (PNSLR_ArraySlice(utf8str)) {0};
-        G_DVRPL_Internal_NumTempDroppedFiles = 0;
-    }
-
-    G_DVRPL_Internal_NumRawInputBuffer = 0;
-    G_DVRPL_Internal_NumEvents = 0;
-
-    {
-        i32 resizeIt = 0, moveIt = 0;
-        while (DVRPL_IterateResizeEvent(&resizeIt, nil)) { }
-        while (DVRPL_IterateMoveEvent  (&moveIt,   nil)) { }
-    }
-
-    // Clear key states
-    for (i32 i = 0; i < (i32)(DVRPL_KeyCode_NUM); i++)
-    {
-        DVRPL_KeyState* curr = &(G_DVRPL_Internal_KeyStates[i]);
-
-        if ((*curr) & DVRPL_KeyState_Released)
-            (*curr) &= ~(DVRPL_KeyState_Released | DVRPL_KeyState_Pressed | DVRPL_KeyState_Held);
-        else
-            (*curr) &= ~(DVRPL_KeyState_Pressed);
-    }
-
-    // Clear mouse delta
-    G_DVRPL_Internal_MouseDelta[0] = G_DVRPL_Internal_MouseDelta[1] = G_DVRPL_Internal_MouseDelta[2] = 0;
 }
 
 static b8 DVRPL_Internal_SetKeyDownState(i32 vKey, b8 down)
