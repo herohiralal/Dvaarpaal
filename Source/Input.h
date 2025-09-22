@@ -66,7 +66,7 @@ ENUM_END
  * The possible states of a key event.
  */
 ENUM_FLAGS_START(DVRPL_KeyState, u8)
-    #define DVRPL_KeyState_None     ((DVRPL_KeyState) 0)
+    #define DVRPL_KeyState_None     ((DVRPL_KeyState) (        0))
     #define DVRPL_KeyState_Pressed  ((DVRPL_KeyState) (1ULL << 0))
     #define DVRPL_KeyState_Held     ((DVRPL_KeyState) (1ULL << 1))
     #define DVRPL_KeyState_Released ((DVRPL_KeyState) (1ULL << 2))
@@ -76,7 +76,7 @@ ENUM_END
  * Any modifiers that are added to a key event.
  */
 ENUM_FLAGS_START(DVRPL_KeyModifier, u8)
-    #define DVRPL_KeyModifier_None      ((DVRPL_KeyModifier) 0)
+    #define DVRPL_KeyModifier_None      ((DVRPL_KeyModifier) (        0))
     #define DVRPL_KeyModifier_Alt       ((DVRPL_KeyModifier) (1ULL << 0))
     #define DVRPL_KeyModifier_Control   ((DVRPL_KeyModifier) (1ULL << 1))
     #define DVRPL_KeyModifier_Shift     ((DVRPL_KeyModifier) (1ULL << 2))
