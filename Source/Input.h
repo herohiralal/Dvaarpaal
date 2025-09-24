@@ -1,3 +1,12 @@
+/**
+ * The input module for Dvaarpaal.
+ * PS - will not work without using the Window module. On all platforms.
+ *
+ * In stark contrast to how the Window module uses opaque handles for OS-specific
+ * objects/APIs, the Input module uses an abstraction approach, where input events
+ * are declared as a cross-platform structure and the implementation files handle
+ * any relevant translation that might be needed.
+ */
 #ifndef DVRPL_INPUT_H // ===========================================================
 #define DVRPL_INPUT_H
 #include "__Prelude.h"
@@ -240,6 +249,11 @@ utf8str DVRPL_GetDroppedFile(u16 fileId);
 
     #if PNSLR_WINDOWS
         static LRESULT CALLBACK DVRPL_Internal_WindowsInputCallback(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    #endif
+
+    #if PNSLR_ANDROID
+        static void DVRPL_Internal_AndroidSetApp(struct android_app* app);
+        static void DVRPL_Internal_FlushEventsTillInFocus(void);
     #endif
 
 #endif

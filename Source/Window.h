@@ -1,8 +1,31 @@
+/**
+ * The window module for Dvaarpaal.
+ * A lot of patterns in this file are all about opaque handles.
+ * The real reason for that is because of how programming in C/C++ works
+ * at the core, and how it involves 'including' the files into your
+ * source code.
+ *
+ * It's fine in a lot of cases, but given how LSPs and auto-completion are
+ * valuable tools for programmers these days, it sucks to see a list of
+ * irrelevant functions, that you'll probably never be calling because
+ * they're specific to a platform.
+ *
+ * This kind of an opaque-handle approach allows us to make it so that
+ * these platform-specific details only need to be included in the private
+ * implementation files, while the APIs remain strictly cross-platform
+ * and easy to use.
+ */
 #ifndef DVRPL_WINDOW_H // ==========================================================
 #define DVRPL_WINDOW_H
 #include "__Prelude.h"
 EXTERN_C_BEGIN
 
+/**
+ * A cross-plataform opaque handle to the application instance.
+ * On Windows, this is an HINSTANCE.
+ * On OSX, this is an NSApplication*.
+ * On Android, this is a struct android_app*.
+ */
 typedef struct DVRPL_App
 {
     u64 handle;

@@ -115,9 +115,13 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
     }
     #elif PNSLR_ANDROID
     {
-        NativeAppHandle h = DVRPL_BREAK_APP_HANDLE(options.app);
+        if (!options.app.handle)
+            return (DVRPL_WindowData) {.window = DVRPL_MAKE_WINDOW_HANDLE(InvalidWindowHandle)};
+
+        struct android_app* h = DVRPL_BREAK_APP_HANDLE(options.app);
         if (h)
         {
+            DVRPL_Internal_AndroidSetApp(h);
             return (DVRPL_WindowData)
             {
                 .window    = DVRPL_MAKE_WINDOW_HANDLE((h->window)),

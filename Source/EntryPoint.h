@@ -2,6 +2,7 @@
 #define DVRPL_ENTRY_PT_H
 #include "__Prelude.h"
 #include "Window.h"
+#include "Input.h"
 EXTERN_C_BEGIN
 
 /**

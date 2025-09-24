@@ -68,4 +68,85 @@
 
     #endif
 
+    #if PNSLR_ANDROID
+
+        cstring* DVRPL_Internal_GetAndroidCmdLineArgs(i32* argc_out)
+        {
+            FILE* f = fopen("/proc/self/cmdline", "rb");
+            if (!f) return NULL;
+
+            cstring buf = NULL;
+            size_t size = 0;
+            ssize_t len = getdelim(&buf, &size, '\0', f); // reads until EOF
+            fclose(f);
+
+            if (len <= 0)
+            {
+                free(buf);
+                return NULL;
+            }
+
+            // Count arguments
+            i32 argc = 0;
+            for (ssize_t i = 0; i < len; i++)
+            {
+                if (buf[i] == '\0')
+                    argc++;
+            }
+
+            // Build argv
+            cstring* argv = calloc(argc + 1, sizeof(cstring));
+            i32 argi = 0;
+            cstring p = buf;
+            for (ssize_t i = 0; i < len; i++)
+            {
+                if (buf[i] == '\0')
+                {
+                    argv[argi++] = p;
+                    p = &buf[i + 1];
+                }
+            }
+            argv[argc] = NULL;
+
+            *argc_out = argc;
+            return argv;
+        }
+
+        void DVRPL_Internal_DisposeAndroidCmdLineArgs(cstring* argv)
+        {
+            if (argv)
+            {
+                free(argv[0]); // the buffer
+                free(argv);    // the array
+            }
+        }
+
+        void android_main(struct android_app* app)
+        {
+            i32 argc; cstring* argv;
+            argv = DVRPL_Internal_GetAndroidCmdLineArgs(&argc);
+
+            PNSLR_ArraySlice(utf8str) args = PNSLR_MakeSlice(utf8str, argc, false, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
+            if (!args.data || !args.count) return -1;
+
+            for (i32 i = 0; i < argc; ++i)
+            {
+                args.data[i] = PNSLR_StringFromCString(argv[i]);
+                if (!args.data[i].data || !args.data[i].count) return -1;
+            }
+
+            DVRPL_Internal_FlushEventsTillInFocus();
+            i32 returnCode = DVRPL_Main(DVRPL_MAKE_APP_HANDLE(app), args);
+
+            __android_log_print(ANDROID_LOG_INFO, "Dvaarpaal", "Exiting with code %d", returnCode);
+
+            for (i32 i = 0; i < argc; i++) PNSLR_FreeString(args.data[i], PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
+            PNSLR_FreeSlice(&args, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
+
+            DVRPL_Internal_DisposeAndroidCmdLineArgs(argv);
+            ANativeActivity_finish(app->activity);
+        }
+
+    #endif
+
 #endif
