@@ -95,7 +95,7 @@
             }
 
             // Build argv
-            cstring* argv = calloc(argc + 1, sizeof(cstring));
+            cstring* argv = calloc((size_t) argc + 1, sizeof(cstring));
             i32 argi = 0;
             cstring p = buf;
             for (ssize_t i = 0; i < len; i++)
@@ -127,12 +127,12 @@
             argv = DVRPL_Internal_GetAndroidCmdLineArgs(&argc);
 
             PNSLR_ArraySlice(utf8str) args = PNSLR_MakeSlice(utf8str, argc, false, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
-            if (!args.data || !args.count) return -1;
+            if (!args.data || !args.count) return;
 
             for (i32 i = 0; i < argc; ++i)
             {
                 args.data[i] = PNSLR_StringFromCString(argv[i]);
-                if (!args.data[i].data || !args.data[i].count) return -1;
+                if (!args.data[i].data || !args.data[i].count) return;
             }
 
             DVRPL_Internal_FlushEventsTillInFocus();

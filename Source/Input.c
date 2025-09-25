@@ -1012,29 +1012,39 @@ static void DVRPL_Internal_ProcessEvents(void)
         i32 ident = 0, evts = 0;
         struct android_poll_source* source = nil;
         i32 timeout = G_DVRPL_Internal_InFocus ? 0 : -1;
-        ALooper_pollAll(timeout, nil, &evts, (void**) &source);
-        if (ident < 0) break;
 
-        if (source)
-        {
-            source->process(G_DVRPL_Internal_AndroidApp, source);
+        // Process all available events
+        do {
+            ident = ALooper_pollOnce(timeout, nil, &evts, (void**) &source);
+            if (ident < 0) break;
 
-            if (!!G_DVRPL_Internal_AndroidApp->destroyRequested)
+            if (source)
             {
-                DVRPL_Event evt =
-                {
-                    .ty       = DVRPL_EvtTy_Quit,
-                    .windowId = DVRPL_MAKE_WINDOW_HANDLE(G_DVRPL_Internal_AndroidApp->window),
-                };
+                source->process(G_DVRPL_Internal_AndroidApp, source);
 
-                DVRPL_Internal_ResizeEventsIfBufferFull();
-                if (G_DVRPL_Internal_NumEvents < G_DVRPL_Internal_Events.count)
+                if (!!G_DVRPL_Internal_AndroidApp->destroyRequested)
                 {
-                    G_DVRPL_Internal_Events.data[G_DVRPL_Internal_NumEvents] = evt;
-                    G_DVRPL_Internal_NumEvents++;
+                    DVRPL_Event evt =
+                    {
+                        .ty       = DVRPL_EvtTy_Quit,
+                        .windowId = DVRPL_MAKE_WINDOW_HANDLE(G_DVRPL_Internal_AndroidApp->window),
+                    };
+
+                    DVRPL_Internal_ResizeEventsIfBufferFull();
+                    if (G_DVRPL_Internal_NumEvents < G_DVRPL_Internal_Events.count)
+                    {
+                        G_DVRPL_Internal_Events.data[G_DVRPL_Internal_NumEvents] = evt;
+                        G_DVRPL_Internal_NumEvents++;
+                    }
                 }
             }
-        }
+
+            // After first poll, use 0 timeout for remaining events
+            timeout = 0;
+
+        } while (ident >= 0);
+
+        if (ident < 0) break;
     }
 }
 
@@ -1166,7 +1176,7 @@ void DVRPL_GatherEvents(PNSLR_Allocator tempAllocator)
     #elif PNSLR_ANDROID
     {
         if (!G_DVRPL_Internal_AndroidApp)
-            return false;
+            return;
 
         if (!DVRPL_Internal_InitialiseInputSystem())
             return;
