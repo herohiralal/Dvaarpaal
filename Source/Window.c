@@ -100,7 +100,7 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
         if (options.acceptDropFiles)
             DragAcceptFiles(output, TRUE);
 
-        NativeSavedWindowData savedData =
+        DVRPL_Internal_NativeSavedWindowData savedData =
         {
             .rect = rect,
             .savedStyle = GetWindowLongW(output, GWL_STYLE),
@@ -125,7 +125,7 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
             return (DVRPL_WindowData)
             {
                 .window    = DVRPL_MAKE_WINDOW_HANDLE((h->window)),
-                .savedData = DVRPL_MAKE_SAVED_WINDOW_DATA((NativeSavedWindowData){.app = h}),
+                .savedData = DVRPL_MAKE_SAVED_WINDOW_DATA((DVRPL_Internal_NativeSavedWindowData){.app = h}),
             };
         }
         else
@@ -162,8 +162,8 @@ b8 DVRPL_SetFullScreen(DVRPL_WindowData* window, b8 status, i16* posX, i16* posY
     if (window == nil || DVRPL_BREAK_WINDOW_HANDLE(window->window) == InvalidWindowHandle)
         return false;
 
-    NativeWindowHandle    windowHandle = DVRPL_BREAK_WINDOW_HANDLE(window->window);
-    NativeSavedWindowData savedData    = DVRPL_BREAK_SAVED_WINDOW_DATA(window->savedData);
+    DVRPL_Internal_NativeWindowHandle    windowHandle = DVRPL_BREAK_WINDOW_HANDLE(window->window);
+    DVRPL_Internal_NativeSavedWindowData savedData    = DVRPL_BREAK_SAVED_WINDOW_DATA(window->savedData);
 
     i16 x, y;
     u16 w, h;

@@ -139,49 +139,49 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY);
 //+skipreflect
 #ifdef DVRPL_IMPLEMENTATION
     #if PNSLR_WINDOWS
-        typedef HINSTANCE NativeAppHandle;
-        typedef HWND NativeWindowHandle;
-        static const NativeWindowHandle InvalidWindowHandle = NULL;
+        typedef HINSTANCE DVRPL_Internal_NativeAppHandle;
+        typedef HWND DVRPL_Internal_NativeWindowHandle;
+        static const DVRPL_Internal_NativeWindowHandle InvalidWindowHandle = NULL;
 
         typedef struct
         {
             RECT rect;
             LONG savedStyle;
             LONG savedExStyle;
-        } NativeSavedWindowData;
+        } DVRPL_Internal_NativeSavedWindowData;
     #elif PNSLR_ANDROID
-        typedef struct android_app* NativeAppHandle;
-        typedef ANativeWindow* NativeWindowHandle;
-        static const NativeWindowHandle InvalidWindowHandle = nil;
+        typedef struct android_app* DVRPL_Internal_NativeAppHandle;
+        typedef ANativeWindow* DVRPL_Internal_NativeWindowHandle;
+        static const DVRPL_Internal_NativeWindowHandle InvalidWindowHandle = nil;
 
         typedef struct
         {
-            NativeAppHandle app;
-        } NativeSavedWindowData;
+            DVRPL_Internal_NativeAppHandle app;
+        } DVRPL_Internal_NativeSavedWindowData;
     #else
         #error "Unimplemented."
     #endif
 
-    static_assert(sizeof(DVRPL_App)  == sizeof(NativeAppHandle),  "DVRPL_App and NativeAppHandle must have the same size.");
-    static_assert(alignof(DVRPL_App) == alignof(NativeAppHandle), "DVRPL_App and NativeAppHandle must have the same alignment.");
+    static_assert(sizeof(DVRPL_App)  == sizeof(DVRPL_Internal_NativeAppHandle),  "DVRPL_App and DVRPL_Internal_NativeAppHandle must have the same size.");
+    static_assert(alignof(DVRPL_App) == alignof(DVRPL_Internal_NativeAppHandle), "DVRPL_App and DVRPL_Internal_NativeAppHandle must have the same alignment.");
 
-    static_assert(sizeof(DVRPL_Window)  == sizeof(NativeWindowHandle),  "DVRPL_Window and NativeWindowHandle must have the same size.");
-    static_assert(alignof(DVRPL_Window) == alignof(NativeWindowHandle), "DVRPL_Window and NativeWindowHandle must have the same alignment.");
+    static_assert(sizeof(DVRPL_Window)  == sizeof(DVRPL_Internal_NativeWindowHandle),  "DVRPL_Window and DVRPL_Internal_NativeWindowHandle must have the same size.");
+    static_assert(alignof(DVRPL_Window) == alignof(DVRPL_Internal_NativeWindowHandle), "DVRPL_Window and DVRPL_Internal_NativeWindowHandle must have the same alignment.");
 
-    static_assert(sizeof(DVRPL_SavedWindowData)  >= sizeof(NativeSavedWindowData),  "DVRPL_SavedWindowData must be large   enough to hold NativeSavedWindowData.");
-    static_assert(alignof(DVRPL_SavedWindowData) >= alignof(NativeSavedWindowData), "DVRPL_SavedWindowData must be aligned enough to hold NativeSavedWindowData.");
+    static_assert(sizeof(DVRPL_SavedWindowData)  >= sizeof(DVRPL_Internal_NativeSavedWindowData),  "DVRPL_SavedWindowData must be large   enough to hold DVRPL_Internal_NativeSavedWindowData.");
+    static_assert(alignof(DVRPL_SavedWindowData) >= alignof(DVRPL_Internal_NativeSavedWindowData), "DVRPL_SavedWindowData must be aligned enough to hold DVRPL_Internal_NativeSavedWindowData.");
 
-    #define DVRPL_BREAK_APP_HANDLE(h) (*(NativeAppHandle*)&((h).handle))
-    #define DVRPL_MAKE_APP_HANDLE(h)  ((DVRPL_App){.handle=*(u64*)&(h)})
+    static PNSLR_FORCEINLINE DVRPL_Internal_NativeAppHandle DVRPL_BREAK_APP_HANDLE(DVRPL_App h) { return *(DVRPL_Internal_NativeAppHandle*)&(h.handle); }
+    static PNSLR_FORCEINLINE DVRPL_App DVRPL_MAKE_APP_HANDLE(DVRPL_Internal_NativeAppHandle h) { return (DVRPL_App){.handle=*(u64*)&(h)}; }
 
-    #define DVRPL_BREAK_WINDOW_HANDLE(h) (*(NativeWindowHandle*)&((h).handle))
-    #define DVRPL_MAKE_WINDOW_HANDLE(h)  ((DVRPL_Window){.handle=*(u64*)&(h)})
+    static PNSLR_FORCEINLINE DVRPL_Internal_NativeWindowHandle DVRPL_BREAK_WINDOW_HANDLE(DVRPL_Window h) { return *(DVRPL_Internal_NativeWindowHandle*)&(h.handle); }
+    static PNSLR_FORCEINLINE DVRPL_Window DVRPL_MAKE_WINDOW_HANDLE(DVRPL_Internal_NativeWindowHandle h) { return (DVRPL_Window){.handle=*(u64*)&(h)}; }
 
-    #define DVRPL_BREAK_SAVED_WINDOW_DATA(d) (*(NativeSavedWindowData*)&((d).buffer))
-    static forceinline DVRPL_SavedWindowData DVRPL_MAKE_SAVED_WINDOW_DATA(NativeSavedWindowData d)
+    static PNSLR_FORCEINLINE DVRPL_Internal_NativeSavedWindowData DVRPL_BREAK_SAVED_WINDOW_DATA(DVRPL_SavedWindowData d) { return *(DVRPL_Internal_NativeSavedWindowData*)&(d.buffer); }
+    static PNSLR_FORCEINLINE DVRPL_SavedWindowData DVRPL_MAKE_SAVED_WINDOW_DATA(DVRPL_Internal_NativeSavedWindowData d)
     {
         DVRPL_SavedWindowData result = {0};
-        PNSLR_MemCopy(&result, &d, sizeof(NativeSavedWindowData));
+        PNSLR_MemCopy(&result, &d, sizeof(DVRPL_Internal_NativeSavedWindowData));
         return result;
     }
 #endif
