@@ -165,6 +165,8 @@ b8 DVRPL_SetFullScreen(DVRPL_WindowData* window, b8 status, i16* posX, i16* posY
     DVRPL_Internal_NativeWindowHandle    windowHandle = DVRPL_BREAK_WINDOW_HANDLE(window->window);
     DVRPL_Internal_NativeSavedWindowData savedData    = DVRPL_BREAK_SAVED_WINDOW_DATA(window->savedData);
 
+    ((void) windowHandle); // silence unused var
+
     i16 x, y;
     u16 w, h;
     #if PNSLR_WINDOWS

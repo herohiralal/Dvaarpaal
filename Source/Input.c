@@ -828,7 +828,7 @@ static void DVRPL_Internal_AddResizeEvent(ANativeWindow* window)
     }
 }
 
-static b8 DVRPL_Internal_InitialiseInputSystem()
+static b8 DVRPL_Internal_InitialiseInputSystem(void)
 {
     if (G_DVRPL_Internal_InputSystemInitialised)
         return true;
@@ -890,11 +890,11 @@ static int32_t DVRPL_Internal_AndroidInputCallback(struct android_app* app, AInp
         int32_t action = actionAndPtrIdx & AMOTION_EVENT_ACTION_MASK;
         int32_t ptrIdx = (actionAndPtrIdx & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)
                             >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
-        int32_t ptrId = AMotionEvent_getPointerId(event, ptrIdx);
-        int32_t pointerCount = AMotionEvent_getPointerCount(event);
+        int32_t ptrId = AMotionEvent_getPointerId(event, (size_t) ptrIdx);
+        int32_t pointerCount = (int32_t) AMotionEvent_getPointerCount(event);
 
-        float primaryX = AMotionEvent_getX(event, ptrIdx);
-        float primaryY = AMotionEvent_getY(event, ptrIdx);
+        float primaryX = AMotionEvent_getX(event, (size_t) ptrIdx);
+        float primaryY = AMotionEvent_getY(event, (size_t) ptrIdx);
 
         // first touch is a down/up; subsequent will be pointer down/up
         switch (action)
@@ -956,13 +956,13 @@ static int32_t DVRPL_Internal_AndroidInputCallback(struct android_app* app, AInp
             {
                 for (i32 i = 0; i < pointerCount; i++)
                 {
-                    ptrId = AMotionEvent_getPointerId(event, i);
+                    ptrId = AMotionEvent_getPointerId(event, (size_t) i);
 
                     DVRPL_Internal_AndroidPtrInfo* ptr = &(G_DVRPL_Internal_AndroidPointers[ptrId]);
                     if (ptr->state & DVRPL_KeyState_Held)
                     {
-                        ptr->posX = AMotionEvent_getX(event, i);
-                        ptr->posY = AMotionEvent_getY(event, i);
+                        ptr->posX = AMotionEvent_getX(event, (size_t) i);
+                        ptr->posY = AMotionEvent_getY(event, (size_t) i);
                     }
                 }
 
