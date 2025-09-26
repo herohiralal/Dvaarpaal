@@ -212,8 +212,8 @@ b8 DVRPL_SetFullScreen(DVRPL_WindowData* window, b8 status, i16* posX, i16* posY
     }
     #elif PNSLR_ANDROID
     {
-        if (status) ANativeActivity_setWindowFlags(savedData.app->activity, AWINDOW_FLAG_FULLSCREEN, 0);
-        else        ANativeActivity_setWindowFlags(savedData.app->activity, 0, AWINDOW_FLAG_FULLSCREEN);
+        if (status) GameActivity_setWindowFlags(savedData.app->activity, GAMEACTIVITY_FLAG_FULLSCREEN, 0);
+        else        GameActivity_setWindowFlags(savedData.app->activity, 0, GAMEACTIVITY_FLAG_FULLSCREEN);
 
         DVRPL_GetWindowDimensions(window, &x, &y, &w, &h);
     }

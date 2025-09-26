@@ -859,19 +859,23 @@ static void DVRPL_Internal_AndroidCommandCallback(struct android_app* app, int32
         case APP_CMD_LOST_FOCUS:
             G_DVRPL_Internal_InFocus = false;
             break;
-        case APP_CMD_CONTENT_RECT_CHANGED: log = PNSLR_StringLiteral("CONTENT_RECT_CHANGED");  break;
-        case APP_CMD_INPUT_CHANGED:        log = PNSLR_StringLiteral("INPUT_CHANGED");         break;
-        case APP_CMD_WINDOW_RESIZED:       log = PNSLR_StringLiteral("WINDOW_RESIZED");        break;
-        case APP_CMD_WINDOW_REDRAW_NEEDED: log = PNSLR_StringLiteral("WINDOW_REDRAW_NEEDED");  break;
-        case APP_CMD_CONFIG_CHANGED:       log = PNSLR_StringLiteral("CONFIG_CHANGED");        break;
-        case APP_CMD_LOW_MEMORY:           log = PNSLR_StringLiteral("LOW_MEMORY");            break;
-        case APP_CMD_START:                log = PNSLR_StringLiteral("START");                 break;
-        case APP_CMD_RESUME:               log = PNSLR_StringLiteral("RESUME");                break;
-        case APP_CMD_SAVE_STATE:           log = PNSLR_StringLiteral("SAVE_STATE");            break;
-        case APP_CMD_PAUSE:                log = PNSLR_StringLiteral("PAUSE");                 break;
-        case APP_CMD_STOP:                 log = PNSLR_StringLiteral("STOP");                  break;
-        case APP_CMD_DESTROY:              log = PNSLR_StringLiteral("DESTROY");               break;
-        default:                           log = PNSLR_StringLiteral("UNKNOWN");               break;
+        case APP_CMD_CONTENT_RECT_CHANGED:    log = PNSLR_StringLiteral("CONTENT_RECT_CHANGED");    break;
+        case APP_CMD_WINDOW_RESIZED:          log = PNSLR_StringLiteral("WINDOW_RESIZED");          break;
+        case APP_CMD_WINDOW_REDRAW_NEEDED:    log = PNSLR_StringLiteral("WINDOW_REDRAW_NEEDED");    break;
+        case APP_CMD_CONFIG_CHANGED:          log = PNSLR_StringLiteral("CONFIG_CHANGED");          break;
+        case APP_CMD_LOW_MEMORY:              log = PNSLR_StringLiteral("LOW_MEMORY");              break;
+        case APP_CMD_START:                   log = PNSLR_StringLiteral("START");                   break;
+        case APP_CMD_RESUME:                  log = PNSLR_StringLiteral("RESUME");                  break;
+        case APP_CMD_SAVE_STATE:              log = PNSLR_StringLiteral("SAVE_STATE");              break;
+        case APP_CMD_PAUSE:                   log = PNSLR_StringLiteral("PAUSE");                   break;
+        case APP_CMD_STOP:                    log = PNSLR_StringLiteral("STOP");                    break;
+        case APP_CMD_DESTROY:                 log = PNSLR_StringLiteral("DESTROY");                 break;
+        case APP_CMD_SOFTWARE_KB_VIS_CHANGED: log = PNSLR_StringLiteral("SOFTWARE_KB_VIS_CHANGED"); break;
+        case APP_CMD_WINDOW_INSETS_CHANGED:   log = PNSLR_StringLiteral("WINDOW_INSETS_CHANGED");   break;
+        case APP_CMD_EDITOR_ACTION:           log = PNSLR_StringLiteral("EDITOR_ACTION");           break;
+        case APP_CMD_KEY_EVENT:               log = PNSLR_StringLiteral("KEY_EVENT");               break;
+        case APP_CMD_TOUCH_EVENT:             log = PNSLR_StringLiteral("TOUCH_EVENT");             break;
+        default:                              log = PNSLR_StringLiteral("UNKNOWN");                 break;
     }
 
     if (!!log.data && !!log.count)
@@ -880,119 +884,117 @@ static void DVRPL_Internal_AndroidCommandCallback(struct android_app* app, int32
     }
 }
 
-static int32_t DVRPL_Internal_AndroidInputCallback(struct android_app* app, AInputEvent* event)
+static b8 DVRPL_Internal_AndroidTouchInputCallback(GameActivity* activity, const GameActivityMotionEvent* event)
 {
     b8 handled = false;
 
-    if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
+    // we only care about motion events
+    // (GameActivity separates key vs motion callbacks, so this is probably redundant)
+    int32_t actionAndPtrIdx = event->action;
+    int32_t action  = actionAndPtrIdx & AMOTION_EVENT_ACTION_MASK;
+    int32_t ptrIdx  = (actionAndPtrIdx & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)
+                        >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+    int32_t ptrId   = event->pointers[ptrIdx].id;
+    int32_t pointerCount = (int32_t)event->pointerCount;
+
+    float primaryX = event->pointers[ptrIdx].axisValues[AMOTION_EVENT_AXIS_X];
+    float primaryY = event->pointers[ptrIdx].axisValues[AMOTION_EVENT_AXIS_Y];
+
+    // first touch is a down/up; subsequent will be pointer down/up
+    switch (action)
     {
-        int32_t actionAndPtrIdx = AMotionEvent_getAction(event);
-        int32_t action = actionAndPtrIdx & AMOTION_EVENT_ACTION_MASK;
-        int32_t ptrIdx = (actionAndPtrIdx & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)
-                            >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
-        int32_t ptrId = AMotionEvent_getPointerId(event, (size_t) ptrIdx);
-        int32_t pointerCount = (int32_t) AMotionEvent_getPointerCount(event);
-
-        float primaryX = AMotionEvent_getX(event, (size_t) ptrIdx);
-        float primaryY = AMotionEvent_getY(event, (size_t) ptrIdx);
-
-        // first touch is a down/up; subsequent will be pointer down/up
-        switch (action)
+        case AMOTION_EVENT_ACTION_DOWN:
+        case AMOTION_EVENT_ACTION_POINTER_DOWN:
         {
-            case AMOTION_EVENT_ACTION_DOWN:
-            case AMOTION_EVENT_ACTION_POINTER_DOWN:
+            G_DVRPL_Internal_AndroidPointers[ptrId].state = DVRPL_KeyState_Pressed | DVRPL_KeyState_Held;
+            G_DVRPL_Internal_AndroidPointers[ptrId].posX  = primaryX;
+            G_DVRPL_Internal_AndroidPointers[ptrId].posY  = primaryY;
+
+            handled = true;
+
+            DVRPL_Internal_ResizeEventsIfBufferFull();
+            if (G_DVRPL_Internal_NumEvents < G_DVRPL_Internal_Events.count)
             {
-                G_DVRPL_Internal_AndroidPointers[ptrId].state = DVRPL_KeyState_Pressed | DVRPL_KeyState_Held;
-                G_DVRPL_Internal_AndroidPointers[ptrId].posX = primaryX;
-                G_DVRPL_Internal_AndroidPointers[ptrId].posY = primaryY;
-
-                handled = true;
-
-                DVRPL_Internal_ResizeEventsIfBufferFull();
-                if (G_DVRPL_Internal_NumEvents < G_DVRPL_Internal_Events.count)
+                DVRPL_Event evt =
                 {
-                    DVRPL_Event evt =
-                    {
-                        .ty          = DVRPL_EvtTy_Touch,
-                        .windowId    = DVRPL_MAKE_WINDOW_HANDLE(app->window),
-                        .touchId     = (u8) ptrId,
-                        .touchStatus = DVRPL_TouchStatus_Pressed,
-                    };
+                    .ty          = DVRPL_EvtTy_Touch,
+                    .windowId    = DVRPL_MAKE_WINDOW_HANDLE(G_DVRPL_Internal_AndroidApp->window),
+                    .touchId     = (u8) ptrId,
+                    .touchStatus = DVRPL_TouchStatus_Pressed,
+                };
 
-                    G_DVRPL_Internal_Events.data[G_DVRPL_Internal_NumEvents] = evt;
+                G_DVRPL_Internal_Events.data[G_DVRPL_Internal_NumEvents] = evt;
                     G_DVRPL_Internal_NumEvents++;
-                }
-
-                break;
-            }
-            case AMOTION_EVENT_ACTION_UP:
-            case AMOTION_EVENT_ACTION_POINTER_UP:
-            {
-                G_DVRPL_Internal_AndroidPointers[ptrId].state = DVRPL_KeyState_Released;
-                G_DVRPL_Internal_AndroidPointers[ptrId].posX = primaryX;
-                G_DVRPL_Internal_AndroidPointers[ptrId].posY = primaryY;
-
-                handled = true;
-
-                DVRPL_Internal_ResizeEventsIfBufferFull();
-                if (G_DVRPL_Internal_NumEvents < G_DVRPL_Internal_Events.count)
-                {
-                    DVRPL_Event evt =
-                    {
-                        .ty          = DVRPL_EvtTy_Touch,
-                        .windowId    = DVRPL_MAKE_WINDOW_HANDLE(app->window),
-                        .touchId     = (u8) ptrId,
-                        .touchStatus = DVRPL_TouchStatus_Released,
-                    };
-
-                    G_DVRPL_Internal_Events.data[G_DVRPL_Internal_NumEvents] = evt;
-                    G_DVRPL_Internal_NumEvents++;
-                }
-
-                break;
             }
 
-            case AMOTION_EVENT_ACTION_MOVE:
-            {
-                for (i32 i = 0; i < pointerCount; i++)
-                {
-                    ptrId = AMotionEvent_getPointerId(event, (size_t) i);
-
-                    DVRPL_Internal_AndroidPtrInfo* ptr = &(G_DVRPL_Internal_AndroidPointers[ptrId]);
-                    if (ptr->state & DVRPL_KeyState_Held)
-                    {
-                        ptr->posX = AMotionEvent_getX(event, (size_t) i);
-                        ptr->posY = AMotionEvent_getY(event, (size_t) i);
-                    }
-                }
-
-                handled = true;
-
-                DVRPL_Internal_ResizeEventsIfBufferFull();
-                if (G_DVRPL_Internal_NumEvents < G_DVRPL_Internal_Events.count)
-                {
-                    DVRPL_Event evt =
-                    {
-                        .ty          = DVRPL_EvtTy_Touch,
-                        .windowId    = DVRPL_MAKE_WINDOW_HANDLE(app->window),
-                        .touchId     = (u8) ptrId,
-                        .touchStatus = DVRPL_TouchStatus_Moved,
-                    };
-
-                    G_DVRPL_Internal_Events.data[G_DVRPL_Internal_NumEvents] = evt;
-                    G_DVRPL_Internal_NumEvents++;
-                }
-
-                break;
-            }
-
-            default:
-                __android_log_print(ANDROID_LOG_WARN, "DVRPL_Input", "Unhandled Android motion event action: %d", action);
-                break;
+            break;
         }
+        case AMOTION_EVENT_ACTION_UP:
+        case AMOTION_EVENT_ACTION_POINTER_UP:
+        {
+            G_DVRPL_Internal_AndroidPointers[ptrId].state = DVRPL_KeyState_Released;
+            G_DVRPL_Internal_AndroidPointers[ptrId].posX  = primaryX;
+            G_DVRPL_Internal_AndroidPointers[ptrId].posY  = primaryY;
+
+            handled = true;
+
+            DVRPL_Internal_ResizeEventsIfBufferFull();
+            if (G_DVRPL_Internal_NumEvents < G_DVRPL_Internal_Events.count)
+            {
+                DVRPL_Event evt =
+                {
+                    .ty          = DVRPL_EvtTy_Touch,
+                    .windowId    = DVRPL_MAKE_WINDOW_HANDLE(G_DVRPL_Internal_AndroidApp->window),
+                    .touchId     = (u8) ptrId,
+                    .touchStatus = DVRPL_TouchStatus_Released,
+                };
+
+                G_DVRPL_Internal_Events.data[G_DVRPL_Internal_NumEvents] = evt;
+                    G_DVRPL_Internal_NumEvents++;
+            }
+
+            break;
+        }
+
+        case AMOTION_EVENT_ACTION_MOVE:
+        {
+            for (i32 i = 0; i < pointerCount; i++)
+            {
+                ptrId = event->pointers[i].id;
+
+                DVRPL_Internal_AndroidPtrInfo* ptr = &G_DVRPL_Internal_AndroidPointers[ptrId];
+                if (ptr->state & DVRPL_KeyState_Held)
+                {
+                    ptr->posX = event->pointers[ptrIdx].axisValues[AMOTION_EVENT_AXIS_X];
+                    ptr->posY = event->pointers[ptrIdx].axisValues[AMOTION_EVENT_AXIS_Y];
+                }
+            }
+
+            handled = true;
+
+            DVRPL_Internal_ResizeEventsIfBufferFull();
+            if (G_DVRPL_Internal_NumEvents < G_DVRPL_Internal_Events.count)
+            {
+                DVRPL_Event evt =
+                {
+                    .ty          = DVRPL_EvtTy_Touch,
+                    .windowId    = DVRPL_MAKE_WINDOW_HANDLE(G_DVRPL_Internal_AndroidApp->window),
+                    .touchId     = (u8)ptrId, // last updated ptrId
+                    .touchStatus = DVRPL_TouchStatus_Moved,
+                };
+
+                G_DVRPL_Internal_Events.data[G_DVRPL_Internal_NumEvents] = evt;
+                    G_DVRPL_Internal_NumEvents++;
+            }
+            break;
+        }
+
+        default:
+            PNSLR_LogWf(PNSLR_StringLiteral("Unhandled Motion Action: $"), PNSLR_FmtArgs(PNSLR_FmtI32(action, PNSLR_IntegerBase_Decimal)), PNSLR_GET_LOC());
+            break;
     }
 
-    return (int32_t) handled;
+    return handled;
 }
 
 static void DVRPL_Internal_AndroidSetApp(struct android_app* app)
@@ -1000,14 +1002,14 @@ static void DVRPL_Internal_AndroidSetApp(struct android_app* app)
     if (G_DVRPL_Internal_AndroidApp)
     {
         G_DVRPL_Internal_AndroidApp->onAppCmd = nil;
-        G_DVRPL_Internal_AndroidApp->onInputEvent = nil;
+        G_DVRPL_Internal_AndroidApp->activity->callbacks->onTouchEvent = nil;
     }
 
     G_DVRPL_Internal_AndroidApp = app;
     if (app)
     {
         app->onAppCmd = DVRPL_Internal_AndroidCommandCallback;
-        app->onInputEvent = DVRPL_Internal_AndroidInputCallback;
+        G_DVRPL_Internal_AndroidApp->activity->callbacks->onTouchEvent = DVRPL_Internal_AndroidTouchInputCallback;
     }
 }
 
