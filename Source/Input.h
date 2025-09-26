@@ -253,7 +253,7 @@ utf8str DVRPL_GetDroppedFile(u16 fileId);
 
     #if PNSLR_ANDROID
         static void DVRPL_Internal_AndroidSetApp(struct android_app* app);
-        static void DVRPL_Internal_FlushEventsTillInFocus(void);
+        static void DVRPL_Internal_FlushEventsTillInFocus(struct android_app* app);
     #endif
 
 #endif

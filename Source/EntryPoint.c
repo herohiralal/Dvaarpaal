@@ -134,13 +134,17 @@
                 args.data[i] = PNSLR_StringFromCString(argv[i]);
                 if (!args.data[i].data || !args.data[i].count) return;
 
-                __android_log_print(ANDROID_LOG_DEBUG, "Dvaarpaal", "Arg %d: %s.", (i + 1), argv[i]);
+                #if PNSLR_DBG
+                    __android_log_print(ANDROID_LOG_INFO, "Dvaarpaal", "Arg [%d]: %s", (i + 1), argv[i]);
+                #endif
             }
 
-            DVRPL_Internal_FlushEventsTillInFocus();
+            DVRPL_Internal_FlushEventsTillInFocus(app);
             i32 returnCode = DVRPL_Main(DVRPL_MAKE_APP_HANDLE(app), args);
 
-            __android_log_print(ANDROID_LOG_INFO, "Dvaarpaal", "Exiting with code %d", returnCode);
+            #if PNSLR_DBG
+                __android_log_print(ANDROID_LOG_INFO, "Dvaarpaal", "Exiting with code %d", returnCode);
+            #endif
 
             PNSLR_FreeSlice(&args, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
 
