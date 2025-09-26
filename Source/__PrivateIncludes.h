@@ -19,8 +19,8 @@ PNSLR_SUPPRESS_WARN
 #endif
 
 #if PNSLR_ANDROID
-    #include <android_native_app_glue.h>
     #include <android/window.h>
+    #include "Dependencies/AndroidGameActivity/game-activity/android_native_app_glue.h"
 #endif
 
 PNSLR_UNSUPPRESS_WARN
