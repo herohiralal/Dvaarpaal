@@ -133,6 +133,8 @@
             {
                 args.data[i] = PNSLR_StringFromCString(argv[i]);
                 if (!args.data[i].data || !args.data[i].count) return;
+
+                __android_log_print(ANDROID_LOG_DEBUG, "Dvaarpaal", "Arg %d: %s.", (i + 1), argv[i]);
             }
 
             DVRPL_Internal_FlushEventsTillInFocus();
@@ -140,7 +142,6 @@
 
             __android_log_print(ANDROID_LOG_INFO, "Dvaarpaal", "Exiting with code %d", returnCode);
 
-            for (i32 i = 0; i < argc; i++) PNSLR_FreeString(args.data[i], PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
             PNSLR_FreeSlice(&args, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
 
             DVRPL_Internal_DisposeAndroidCmdLineArgs(argv);
