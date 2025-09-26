@@ -997,6 +997,12 @@ static int32_t DVRPL_Internal_AndroidInputCallback(struct android_app* app, AInp
 
 static void DVRPL_Internal_AndroidSetApp(struct android_app* app)
 {
+    if (G_DVRPL_Internal_AndroidApp)
+    {
+        G_DVRPL_Internal_AndroidApp->onAppCmd = nil;
+        G_DVRPL_Internal_AndroidApp->onInputEvent = nil;
+    }
+
     G_DVRPL_Internal_AndroidApp = app;
     if (app)
     {
@@ -1005,45 +1011,58 @@ static void DVRPL_Internal_AndroidSetApp(struct android_app* app)
     }
 }
 
-static void DVRPL_Internal_ProcessEvents(struct android_app* app)
+static void DVRPL_Internal_ProcessEvents(void)
 {
     while (true)
     {
         i32 ident = 0, evts = 0;
         struct android_poll_source* source = nil;
         i32 timeout = G_DVRPL_Internal_InFocus ? 0 : -1;
-        ALooper_pollAll(timeout, nil, &evts, (void**) &source);
-        if (ident < 0) break;
 
-        if (source)
-        {
-            source->process(app, source);
+        // Process all available events
+        do {
+            ident = ALooper_pollOnce(timeout, nil, &evts, (void**) &source);
+            if (ident < 0) break;
 
-            if (!!app->destroyRequested)
+            if (source)
             {
-                DVRPL_Event evt =
-                {
-                    .ty       = DVRPL_EvtTy_Quit,
-                    .windowId = DVRPL_MAKE_WINDOW_HANDLE(G_DVRPL_Internal_AndroidApp->window),
-                };
+                source->process(G_DVRPL_Internal_AndroidApp, source);
 
-                DVRPL_Internal_ResizeEventsIfBufferFull();
-                if (G_DVRPL_Internal_NumEvents < G_DVRPL_Internal_Events.count)
+                if (!!G_DVRPL_Internal_AndroidApp->destroyRequested)
                 {
-                    G_DVRPL_Internal_Events.data[G_DVRPL_Internal_NumEvents] = evt;
-                    G_DVRPL_Internal_NumEvents++;
+                    DVRPL_Event evt =
+                    {
+                        .ty       = DVRPL_EvtTy_Quit,
+                        .windowId = DVRPL_MAKE_WINDOW_HANDLE(G_DVRPL_Internal_AndroidApp->window),
+                    };
+
+                    DVRPL_Internal_ResizeEventsIfBufferFull();
+                    if (G_DVRPL_Internal_NumEvents < G_DVRPL_Internal_Events.count)
+                    {
+                        G_DVRPL_Internal_Events.data[G_DVRPL_Internal_NumEvents] = evt;
+                        G_DVRPL_Internal_NumEvents++;
+                    }
                 }
             }
-        }
+
+            // After first poll, use 0 timeout for remaining events
+            timeout = 0;
+
+        } while (ident >= 0);
+
+        if (ident < 0) break;
     }
 }
 
 static void DVRPL_Internal_FlushEventsTillInFocus(struct android_app* app)
 {
+    if (!app) return;
+    DVRPL_Internal_AndroidSetApp(app);
     while (!G_DVRPL_Internal_InFocus)
     {
-        DVRPL_Internal_ProcessEvents(app);
+        DVRPL_Internal_ProcessEvents();
     }
+    DVRPL_Internal_AndroidSetApp(nil);
 }
 
 #else
@@ -1180,7 +1199,7 @@ void DVRPL_GatherEvents(PNSLR_Allocator tempAllocator)
             G_DVRPL_Internal_ResizeEventCalledOnce = true;
         }
 
-        DVRPL_Internal_ProcessEvents(G_DVRPL_Internal_AndroidApp);
+        DVRPL_Internal_ProcessEvents();
     }
     #endif
 }
