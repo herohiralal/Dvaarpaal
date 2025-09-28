@@ -11,4 +11,8 @@
 
 #include "Dependencies/Panshilar/Source/zzzz_Unity.c"
 
+#if PNSLR_ANDROID
+    #include "Dependencies/AndroidGameActivity/UnityBuild.c"
+#endif
+
 #endif//DVRPL_UNITY_C

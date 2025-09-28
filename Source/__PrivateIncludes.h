@@ -21,10 +21,6 @@ PNSLR_SUPPRESS_WARN
 #if PNSLR_ANDROID
     #include "Dependencies/AndroidGameActivity/game-activity/android_native_app_glue.h"
     #include "Dependencies/AndroidGameActivity/game-activity/GameActivityEvents.h"
-    #ifdef DVRPL_IMPLEMENTATION
-        // it includes stdbool, which defines bool, which we 'uninclude'
-        #include "Dependencies/AndroidGameActivity/UnityBuild.c"
-    #endif
 #endif
 
 PNSLR_UNSUPPRESS_WARN
