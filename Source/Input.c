@@ -1073,9 +1073,24 @@ static void DVRPL_Internal_FlushEventsTillInFocus(struct android_app* app)
 
 // public platform-unspecific functions ============================================
 
-PNSLR_ArraySlice(DVRPL_Event) DVRPL_GetEvents(void)
+b8 DVRPL_IterateEvents(i64* iterator, DVRPL_Event* val)
 {
-    return (PNSLR_ArraySlice(DVRPL_Event)) {.data = G_DVRPL_Internal_Events.data, .count = G_DVRPL_Internal_NumEvents};
+    if (!iterator)
+    {
+        if (val) *val = (DVRPL_Event) {0};
+        return false;
+    }
+
+    if (*iterator >= G_DVRPL_Internal_NumEvents)
+    {
+        *iterator = I64_MAX; // invalidate iterator
+        if (val) *val = (DVRPL_Event) {0};
+        return false;
+    }
+
+    if (val) *val = G_DVRPL_Internal_Events.data[*iterator];
+    (*iterator)++;
+    return true;
 }
 
 DVRPL_KeyState DVRPL_GetKeyState(DVRPL_KeyCode key)

@@ -187,11 +187,9 @@ static_assert(alignof(DVRPL_Event) == 32, "DVRPL_Event must be 32-byte aligned."
 void DVRPL_GatherEvents(PNSLR_Allocator tempAllocator);
 
 /**
- * Get all events that were gathered this frame.
- * Returns a slice of events that is valid until the next call to DVRPL_GatherEvents.
- * Not thread-safe.
+ * Iterate across all events that were gathered this frame.
  */
-PNSLR_ArraySlice(DVRPL_Event) DVRPL_GetEvents(void);
+b8 DVRPL_IterateEvents(i64* iterator, DVRPL_Event* val OPT_ARG);
 
 /**
  * Iterate across window resize events.
