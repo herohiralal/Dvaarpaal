@@ -3,10 +3,13 @@
 
 #ifndef DVRPL_SKIP_ENTRY_PT
 
-    #if PNSLR_WINDOWS
+    #if PNSLR_WINDOWS // windows only entry points
 
-        int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR pCmdLine, int nCmdShow)
+        i32 WWinMainImpl(rawptr hInstancePtr, u16* pCmdLinePtr, DVRPL_MainDelegate mainFn)
         {
+            HINSTANCE hInstance = (HINSTANCE) hInstancePtr;
+            LPWSTR    pCmdLine  = (LPWSTR)    pCmdLinePtr;
+
             int argc;
             WCHAR** argv = CommandLineToArgvW(pCmdLine, &argc);
 
@@ -24,31 +27,28 @@
 
             LocalFree(argv);
 
-            i32 returnCode = DVRPL_Main(DVRPL_MAKE_APP_HANDLE(hInstance), args);
+            i32 returnCode = mainFn(DVRPL_MAKE_APP_HANDLE(hInstance), args);
             for (i32 i = 0; i < argc; i++) PNSLR_FreeString(args.data[i], PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
             PNSLR_FreeSlice(&args, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
 
             return returnCode;
         }
 
-        BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+    #else
+
+        i32 WWinMainImpl(rawptr hInstancePtr, u16* pCmdLinePtr, DVRPL_MainDelegate mainFn)
         {
-            switch (fdwReason)
-            {
-                case DLL_PROCESS_ATTACH:
-                case DLL_THREAD_ATTACH:
-                case DLL_THREAD_DETACH:
-                case DLL_PROCESS_DETACH:
-                    break;
-            }
-            return TRUE; // Successful DLL_PROCESS_ATTACH.
+            (void) hInstancePtr;
+            (void) pCmdLinePtr;
+            (void) mainFn;
+            return -1;
         }
 
     #endif
 
-    #if PNSLR_LINUX || PNSLR_OSX
+    #if PNSLR_LINUX || PNSLR_OSX || PNSLR_WINDOWS
 
-        i32 main(i32 argc, cstring* argv)
+        i32 MainImpl(i32 argc, cstring* argv, DVRPL_MainDelegate mainFn)
         {
             PNSLR_ArraySlice(utf8str) args = PNSLR_MakeSlice(utf8str, argc, false, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
             if (!args.data || !args.count) return -1;
@@ -59,11 +59,27 @@
                 if (!args.data[i].data || !args.data[i].count) return -1;
             }
 
-            i32 returnCode = DVRPL_Main((DVRPL_App) {0}, args);
-            for (i32 i = 0; i < argc; i++) PNSLR_FreeString(args.data[i], PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
+            #if PNSLR_WINDOWS
+                HINSTANCE hInstance = GetModuleHandleW(nil);
+                DVRPL_App app = DVRPL_MAKE_APP_HANDLE(hInstance);
+            #else
+                DVRPL_App app = (DVRPL_App) {0};
+            #endif
+
+            i32 returnCode = mainFn(app, args);
             PNSLR_FreeSlice(&args, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
 
             return returnCode;
+        }
+
+    #else
+
+        i32 MainImpl(i32 argc, cstring* argv, DVRPL_MainDelegate mainFn)
+        {
+            (void) argc;
+            (void) argv;
+            (void) mainFn;
+            return -1;
         }
 
     #endif
@@ -121,8 +137,10 @@
             }
         }
 
-        void android_main(struct android_app* app)
+        void AndroidMainImpl(rawptr appPtr, DVRPL_MainDelegate mainFn)
         {
+            struct android_app* app = (struct android_app*) appPtr;
+
             i32 argc; cstring* argv;
             argv = DVRPL_Internal_GetAndroidCmdLineArgs(&argc);
 
@@ -140,7 +158,7 @@
             }
 
             DVRPL_Internal_FlushEventsTillInFocus(app);
-            i32 returnCode = DVRPL_Main(DVRPL_MAKE_APP_HANDLE(app), args);
+            i32 returnCode = mainFn(DVRPL_MAKE_APP_HANDLE(app), args);
 
             #if PNSLR_DBG
                 __android_log_print(ANDROID_LOG_INFO, "Dvaarpaal", "Exiting with code %d", returnCode);
@@ -150,6 +168,14 @@
 
             DVRPL_Internal_DisposeAndroidCmdLineArgs(argv);
             GameActivity_finish(app->activity);
+        }
+
+    #else
+
+        void AndroidMainImpl(rawptr appPtr, DVRPL_MainDelegate mainFn)
+        {
+            (void) appPtr;
+            (void) mainFn;
         }
 
     #endif
