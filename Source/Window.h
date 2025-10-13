@@ -47,7 +47,7 @@ typedef struct DVRPL_Window
  */
 typedef struct alignas(PNSLR_PTR_SIZE) DVRPL_SavedWindowData
 {
-    u8 buffer[6 * PNSLR_PTR_SIZE];
+    u8 buffer[5 * PNSLR_PTR_SIZE];
 } DVRPL_SavedWindowData;
 
 /**
@@ -158,8 +158,6 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY);
         {
             #ifdef __OBJC__
                 DVRPL_App owningApp;
-                NSRect windowFrame;
-                NSWindowStyleMask style;
             #else
                 u64 data; // stub to compile
             #endif
