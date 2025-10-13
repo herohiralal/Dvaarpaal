@@ -22,6 +22,8 @@
             i32 returnCode = mainFn(app, args);
 
             nativeApp = (__bridge_transfer NSApplication*) DVRPL_BREAK_APP_HANDLE(app);
+            
+            [nativeApp terminate:nil];
 
             PNSLR_FreeSlice(&args, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
 
