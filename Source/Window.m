@@ -82,6 +82,14 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
         {
             [nativeWindow center];
         }
+        
+        NSView* view = [nativeWindow contentView];
+        [view setWantsLayer:YES];
+        
+        view.layer.backgroundColor = [[NSColor colorWithCalibratedRed:((CGFloat) options.bgColR) / 255.0
+                                                                 green:((CGFloat) options.bgColG) / 255.0
+                                                                  blue:((CGFloat) options.bgColB) / 255.0
+                                                                 alpha:((CGFloat) options.bgColA) / 255.0] CGColor];
 
         PNSLR_FreeCString(titleStr, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
 
