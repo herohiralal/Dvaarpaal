@@ -254,6 +254,10 @@ utf8str DVRPL_GetDroppedFile(u16 fileId);
         static void DVRPL_Internal_FlushEventsTillInFocus(struct android_app* app);
     #endif
 
+    #if PNSLR_OSX && defined(__OBJC__)
+        static void DVRPL_Internal_AppleSetApp(NSApplication* app);
+    #endif
+
 #endif
 //-skipreflect
 

@@ -20,9 +20,9 @@
             DVRPL_App app = DVRPL_MAKE_APP_HANDLE((__bridge_retained rawptr) nativeApp);
 
             i32 returnCode = mainFn(app, args);
-            
-            nativeApp = (__bridge NSApplication*) DVRPL_BREAK_APP_HANDLE(app);
-            
+
+            nativeApp = (__bridge_transfer NSApplication*) DVRPL_BREAK_APP_HANDLE(app);
+
             PNSLR_FreeSlice(&args, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
 
             return returnCode;

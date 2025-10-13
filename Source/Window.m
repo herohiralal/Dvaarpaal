@@ -7,9 +7,10 @@ static b8 G_DVRPL_Internal_OSXAppInitialised = false;
 DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
 {
     @autoreleasepool {
-        // NSApplication* app = (NSApplication*) DVRPL_BREAK_APP_HANDLE(options.app);
+        NSApplication* app = (__bridge NSApplication*) DVRPL_BREAK_APP_HANDLE(options.app);
         if (!G_DVRPL_Internal_OSXAppInitialised)
         {
+            DVRPL_Internal_AppleSetApp(app);
             G_DVRPL_Internal_OSXAppInitialised = true;
         }
 
@@ -40,7 +41,7 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
 void DVRPL_DestroyWindow(DVRPL_WindowData* window)
 {
     @autoreleasepool {
-        NSWindow* wnd = (__bridge NSWindow*) DVRPL_BREAK_WINDOW_HANDLE(window->window);
+        NSWindow* wnd = (__bridge_transfer NSWindow*) DVRPL_BREAK_WINDOW_HANDLE(window->window);
         [wnd close];
         window->window = DVRPL_MAKE_WINDOW_HANDLE(DVRPL_Internal_InvalidWindowHandle);
     }
