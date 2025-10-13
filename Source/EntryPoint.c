@@ -72,6 +72,10 @@
             return returnCode;
         }
 
+    #elif PNSLR_OSX || PNSLR_IOS
+
+        // implementation in objc files
+
     #else
 
         i32 MainImpl(i32 argc, cstring* argv, DVRPL_MainDelegate mainFn)

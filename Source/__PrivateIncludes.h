@@ -27,7 +27,7 @@ PNSLR_SUPPRESS_WARN
     #include "Dependencies/AndroidGameActivity/game-activity/GameActivityEvents.h"
 #endif
 
-#if PNSLR_APPLE
+#if PNSLR_APPLE && defined(__OBJC__)
     #include <Foundation/Foundation.h>
 
     #if PNSLR_OSX
