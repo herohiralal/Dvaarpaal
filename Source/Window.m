@@ -10,6 +10,38 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
         NSApplication* app = (__bridge NSApplication*) DVRPL_BREAK_APP_HANDLE(options.app);
         if (!G_DVRPL_Internal_OSXAppInitialised)
         {
+            NSMenu* mainMenu = [[NSMenu alloc] init];
+            [NSApp setMainMenu:mainMenu];
+
+            // Create Apple menu
+            NSMenuItem* appleItem = [[NSMenuItem alloc] init];
+            [mainMenu addItem:appleItem];
+
+            NSMenu* appleMenu = [[NSMenu alloc] initWithTitle:@""];
+            [appleItem setSubmenu:appleMenu];
+
+            // Add an item to the Apple menu
+            NSMenuItem* aboutItem =
+                [[NSMenuItem alloc] initWithTitle:@"About This App"
+                                           action:@selector(orderFrontStandardAboutPanel:)
+                                    keyEquivalent:@""];
+            [appleMenu addItem:aboutItem];
+
+            NSMenuItem* fullScreenItem =
+                [[NSMenuItem alloc] initWithTitle:@"Toggle Full Screen"
+                                           action:@selector(toggleFullScreen:)
+                                    keyEquivalent:@"f"];
+            [fullScreenItem setKeyEquivalentModifierMask:NSEventModifierFlagControl | NSEventModifierFlagCommand];
+            [appleMenu addItem:fullScreenItem];
+
+            // Add standard "Quit" item
+            NSMenuItem* quitItem =
+                [[NSMenuItem alloc] initWithTitle:@"Quit"
+                                           action:@selector(terminate:)
+                                    keyEquivalent:@"q"];
+            [appleMenu addItem:quitItem];
+            [app finishLaunching];
+
             DVRPL_Internal_AppleSetApp(app);
             G_DVRPL_Internal_OSXAppInitialised = true;
         }

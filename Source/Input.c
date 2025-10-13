@@ -1071,7 +1071,21 @@ static void DVRPL_Internal_FlushEventsTillInFocus(struct android_app* app)
 
     void DVRPL_Internal_AppleResizeEventsIfBufferFull(void) { DVRPL_Internal_ResizeEventsIfBufferFull(); }
     void DVRPL_Internal_AppleClearExistingInputData(void) { DVRPL_Internal_ClearExistingInputData(); }
-    void DVRPL_Internal_AppleGatherEvents(PNSLR_Allocator tempAlocator);
+    void DVRPL_Internal_AppleGatherEvents(
+        PNSLR_Allocator* currTempAllocator,
+        PNSLR_ArraySlice(utf8str)* tempDroppedFiles,
+        i64* numTempDroppedFiles,
+        PNSLR_ArraySlice(DVRPL_WindowResizeData)* tempResizes,
+        i64* numTempResizes,
+        PNSLR_ArraySlice(DVRPL_WindowMoveData)* tempMoves,
+        i64* numTempMoves,
+        PNSLR_ArraySlice(DVRPL_Event)* events,
+        i64* numEvents,
+        i32* mouseDeltas,
+        DVRPL_KeyState* keyStates,
+        b8* appHasFocus,
+        PNSLR_Allocator tempAllocator
+    );
 
 #else
     #error "Unimplemented platform for input system."
@@ -1226,7 +1240,21 @@ void DVRPL_GatherEvents(PNSLR_Allocator tempAllocator)
     }
     #elif PNSLR_APPLE
     {
-        DVRPL_Internal_AppleGatherEvents(tempAllocator);
+        DVRPL_Internal_AppleGatherEvents(
+            &G_DVRPL_Internal_CurrentTempAllocator,
+            &G_DVRPL_Internal_TempDroppedFiles,
+            &G_DVRPL_Internal_NumTempDroppedFiles,
+            &G_DVRPL_Internal_TempResizes,
+            &G_DVRPL_Internal_NumTempResizes,
+            &G_DVRPL_Internal_TempMoves,
+            &G_DVRPL_Internal_NumTempMoves,
+            &G_DVRPL_Internal_Events,
+            &G_DVRPL_Internal_NumEvents,
+            G_DVRPL_Internal_MouseDelta,
+            G_DVRPL_Internal_KeyStates,
+            &G_DVRPL_Internal_AppHasFocus,
+            tempAllocator
+        );
     }
     #endif
 }
