@@ -92,8 +92,8 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
 
         PNSLR_FreeSlice(&title, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
 
-        if (output == InvalidWindowHandle) // TODO: handle failure
-            return (DVRPL_WindowData){.window = DVRPL_MAKE_WINDOW_HANDLE(InvalidWindowHandle)};
+        if (output == DVRPL_Internal_InvalidWindowHandle) // TODO: handle failure
+            return (DVRPL_WindowData){.window = DVRPL_MAKE_WINDOW_HANDLE(DVRPL_Internal_InvalidWindowHandle)};
 
         UpdateWindow(output);
         ShowWindow(output, SW_SHOW);
@@ -117,7 +117,7 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
     #elif PNSLR_ANDROID
     {
         if (!options.app.handle)
-            return (DVRPL_WindowData) {.window = DVRPL_MAKE_WINDOW_HANDLE(InvalidWindowHandle)};
+            return (DVRPL_WindowData) {.window = DVRPL_MAKE_WINDOW_HANDLE(DVRPL_Internal_InvalidWindowHandle)};
 
         struct android_app* h = DVRPL_BREAK_APP_HANDLE(options.app);
         if (h)
@@ -141,13 +141,13 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
 
 void DVRPL_DestroyWindow(DVRPL_WindowData* window)
 {
-    if (window == nil || DVRPL_BREAK_WINDOW_HANDLE(window->window) == InvalidWindowHandle)
+    if (window == nil || DVRPL_BREAK_WINDOW_HANDLE(window->window) == DVRPL_Internal_InvalidWindowHandle)
         return;
 
     #if PNSLR_WINDOWS
     {
         DestroyWindow(DVRPL_BREAK_WINDOW_HANDLE(window->window));
-        window->window = DVRPL_MAKE_WINDOW_HANDLE(InvalidWindowHandle);
+        window->window = DVRPL_MAKE_WINDOW_HANDLE(DVRPL_Internal_InvalidWindowHandle);
     }
     #elif PNSLR_ANDROID
     {
@@ -160,7 +160,7 @@ void DVRPL_DestroyWindow(DVRPL_WindowData* window)
 
 b8 DVRPL_SetFullScreen(DVRPL_WindowData* window, b8 status, i16* posX, i16* posY, u16* sizeX, u16* sizeY)
 {
-    if (window == nil || DVRPL_BREAK_WINDOW_HANDLE(window->window) == InvalidWindowHandle)
+    if (window == nil || DVRPL_BREAK_WINDOW_HANDLE(window->window) == DVRPL_Internal_InvalidWindowHandle)
         return false;
 
     DVRPL_Internal_NativeWindowHandle    windowHandle = DVRPL_BREAK_WINDOW_HANDLE(window->window);
@@ -231,7 +231,7 @@ b8 DVRPL_SetFullScreen(DVRPL_WindowData* window, b8 status, i16* posX, i16* posY
 
 b8 DVRPL_GetWindowDimensions(DVRPL_WindowData* window, i16* posX, i16* posY, u16* sizeX, u16* sizeY)
 {
-    if (window == nil || DVRPL_BREAK_WINDOW_HANDLE(window->window) == InvalidWindowHandle)
+    if (window == nil || DVRPL_BREAK_WINDOW_HANDLE(window->window) == DVRPL_Internal_InvalidWindowHandle)
         return false;
 
     i16 x, y;
@@ -270,7 +270,7 @@ b8 DVRPL_GetWindowDimensions(DVRPL_WindowData* window, i16* posX, i16* posY, u16
 
 b8 DVRPL_GetPtrPosFromWindow(DVRPL_Window window, i16* posX, i16* posY)
 {
-    if (DVRPL_BREAK_WINDOW_HANDLE(window) == InvalidWindowHandle)
+    if (DVRPL_BREAK_WINDOW_HANDLE(window) == DVRPL_Internal_InvalidWindowHandle)
         return false;
 
     i16 x, y;

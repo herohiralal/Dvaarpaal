@@ -141,7 +141,7 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY);
     #if PNSLR_WINDOWS
         typedef HINSTANCE DVRPL_Internal_NativeAppHandle;
         typedef HWND DVRPL_Internal_NativeWindowHandle;
-        static const DVRPL_Internal_NativeWindowHandle InvalidWindowHandle = NULL;
+        static const DVRPL_Internal_NativeWindowHandle DVRPL_Internal_InvalidWindowHandle = NULL;
 
         typedef struct
         {
@@ -152,7 +152,7 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY);
     #elif PNSLR_OSX
         typedef rawptr DVRPL_Internal_NativeAppHandle; // NSApplication*
         typedef rawptr DVRPL_Internal_NativeWindowHandle; // NSWindow*
-        static const DVRPL_Internal_NativeWindowHandle InvalidWindowHandle = nil;
+        static const DVRPL_Internal_NativeWindowHandle DVRPL_Internal_InvalidWindowHandle = nil;
 
         typedef struct
         {
@@ -161,7 +161,7 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY);
     #elif PNSLR_ANDROID
         typedef struct android_app* DVRPL_Internal_NativeAppHandle;
         typedef ANativeWindow* DVRPL_Internal_NativeWindowHandle;
-        static const DVRPL_Internal_NativeWindowHandle InvalidWindowHandle = nil;
+        static const DVRPL_Internal_NativeWindowHandle DVRPL_Internal_InvalidWindowHandle = nil;
 
         typedef struct
         {
