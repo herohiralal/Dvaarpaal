@@ -149,6 +149,15 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY);
             LONG savedStyle;
             LONG savedExStyle;
         } DVRPL_Internal_NativeSavedWindowData;
+    #elif PNSLR_OSX
+        typedef rawptr DVRPL_Internal_NativeAppHandle; // NSApplication*
+        typedef rawptr DVRPL_Internal_NativeWindowHandle; // NSWindow*
+        static const DVRPL_Internal_NativeWindowHandle InvalidWindowHandle = nil;
+
+        typedef struct
+        {
+            u64 data; // reserved for future use
+        } DVRPL_Internal_NativeSavedWindowData;
     #elif PNSLR_ANDROID
         typedef struct android_app* DVRPL_Internal_NativeAppHandle;
         typedef ANativeWindow* DVRPL_Internal_NativeWindowHandle;

@@ -1,6 +1,7 @@
 #define DVRPL_IMPLEMENTATION
 #include "Window.h"
 #include "Input.h"
+#if !PNSLR_APPLE // apple stuff will be on objc file
 
 #if PNSLR_WINDOWS
 
@@ -312,3 +313,4 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY)
         #error "Unimplemented."
     #endif
 }
+#endif

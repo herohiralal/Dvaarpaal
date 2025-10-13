@@ -46,7 +46,7 @@
 
     #endif
 
-    #if PNSLR_LINUX || PNSLR_OSX || PNSLR_WINDOWS
+    #if PNSLR_LINUX || PNSLR_WINDOWS
 
         i32 MainImpl(i32 argc, cstring* argv, DVRPL_MainDelegate mainFn)
         {

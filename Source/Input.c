@@ -1067,6 +1067,12 @@ static void DVRPL_Internal_FlushEventsTillInFocus(struct android_app* app)
     DVRPL_Internal_AndroidSetApp(nil);
 }
 
+#elif PNSLR_APPLE
+
+    void DVRPL_Internal_AppleResizeEventsIfBufferFull(void) { DVRPL_Internal_ResizeEventsIfBufferFull(); }
+    void DVRPL_Internal_AppleClearExistingInputData(void) { DVRPL_Internal_ClearExistingInputData(); }
+    void DVRPL_Internal_AppleGatherEvents(PNSLR_Allocator tempAlocator);
+
 #else
     #error "Unimplemented platform for input system."
 #endif
@@ -1217,6 +1223,10 @@ void DVRPL_GatherEvents(PNSLR_Allocator tempAllocator)
         }
 
         DVRPL_Internal_ProcessEvents();
+    }
+    #elif PNSLR_APPLE
+    {
+        DVRPL_Internal_AppleGatherEvents(tempAllocator);
     }
     #endif
 }

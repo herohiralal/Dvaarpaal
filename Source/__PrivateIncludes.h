@@ -27,6 +27,19 @@ PNSLR_SUPPRESS_WARN
     #include "Dependencies/AndroidGameActivity/game-activity/GameActivityEvents.h"
 #endif
 
+#if PNSLR_APPLE
+    #include <Foundation/Foundation.h>
+
+    #if PNSLR_OSX
+        #include <Cocoa/Cocoa.h>
+    #elif PNSLR_IOS
+        #include <UIKit/UIKit.h>
+    #endif
+
+    #include <Metal/Metal.h>
+
+#endif
+
 PNSLR_UNSUPPRESS_WARN
 
 #endif//DVRPL_PRIVATE_INCLUDES_H
