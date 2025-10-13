@@ -78,7 +78,7 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
         NSString* titleNsStr = [NSString stringWithUTF8String:titleStr];
         [nativeWindow setTitle:titleNsStr];
         [nativeWindow makeKeyAndOrderFront:nil];
-        
+
         if (options.posX == 0 && options.posY == 0) // uninitialised
         {
             [nativeWindow center];
@@ -104,7 +104,45 @@ void DVRPL_DestroyWindow(DVRPL_WindowData* window)
 
 b8 DVRPL_SetFullScreen(DVRPL_WindowData* window, b8 status, i16* posX, i16* posY, u16* sizeX, u16* sizeY)
 {
-    return false;
+    @autoreleasepool {
+        DVRPL_Internal_NativeSavedWindowData savedData = DVRPL_BREAK_SAVED_WINDOW_DATA(window->savedData);
+        NSApplication* app = (__bridge NSApplication*) DVRPL_BREAK_APP_HANDLE(savedData.owningApp);
+        NSWindow* wnd = (__bridge NSWindow*) DVRPL_BREAK_WINDOW_HANDLE(window->window);
+        NSView* view = [wnd contentView];
+        CGRect frame = [view frame];
+        NSWindowStyleMask mask = [wnd styleMask];
+
+        if (!!(mask & NSWindowStyleMaskFullScreen) && status)
+        {
+            if (posX) *posX = (i16) frame.origin.x;
+            if (posY) *posY = (i16) frame.origin.y;
+            if (sizeX) *sizeX = (u16) frame.size.width;
+            if (sizeY) *sizeY = (u16) frame.size.height;
+
+            return true;
+        }
+
+        [wnd toggleFullScreen:wnd];
+
+        if (status)
+        {
+            [app setPresentationOptions:NSApplicationPresentationHideDock|NSApplicationPresentationHideMenuBar];
+        }
+        else
+        {
+            [app setPresentationOptions:NSApplicationPresentationDefault];
+        }
+
+        NSWindowStyleMask mask2 = [wnd styleMask];
+        frame = [view frame];
+
+        if (posX) *posX = (i16) frame.origin.x;
+        if (posY) *posY = (i16) frame.origin.y;
+        if (sizeX) *sizeX = (u16) frame.size.width;
+        if (sizeY) *sizeY = (u16) frame.size.height;
+
+        return (mask2 & NSWindowStyleMaskFullScreen) != (mask & NSWindowStyleMaskFullScreen);
+    }
 }
 
 b8 DVRPL_GetWindowDimensions(DVRPL_WindowData* window, i16* posX, i16* posY, u16* sizeX, u16* sizeY)

@@ -47,7 +47,7 @@ typedef struct DVRPL_Window
  */
 typedef struct alignas(PNSLR_PTR_SIZE) DVRPL_SavedWindowData
 {
-    u8 buffer[5 * PNSLR_PTR_SIZE];
+    u8 buffer[6 * PNSLR_PTR_SIZE];
 } DVRPL_SavedWindowData;
 
 /**
@@ -156,7 +156,13 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY);
 
         typedef struct
         {
-            u64 data; // reserved for future use
+            #ifdef __OBJC__
+                DVRPL_App owningApp;
+                NSRect windowFrame;
+                NSWindowStyleMask style;
+            #else
+                u64 data; // stub to compile
+            #endif
         } DVRPL_Internal_NativeSavedWindowData;
     #elif PNSLR_ANDROID
         typedef struct android_app* DVRPL_Internal_NativeAppHandle;
