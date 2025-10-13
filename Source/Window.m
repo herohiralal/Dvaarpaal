@@ -46,20 +46,43 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
             G_DVRPL_Internal_OSXAppInitialised = true;
         }
 
-        NSRect rect = NSMakeRect(options.posX, options.posY, options.sizeX, options.sizeY);
-        NSWindowStyleMask style = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable;
+        NSScreen* targetScreen = [NSScreen mainScreen];
+        CGFloat pixelsToPointsFactor = ((CGFloat) 1) / [targetScreen backingScaleFactor];
+        NSRect tgtFrame = {0};
+        tgtFrame.origin = (CGPoint)
+        {
+            .x = ((CGFloat) options.posX) * pixelsToPointsFactor,
+            .y = ((CGFloat) options.posY) * pixelsToPointsFactor
+        };
+        tgtFrame.size = (CGSize)
+        {
+            .width = ((CGFloat) options.sizeX) * pixelsToPointsFactor,
+            .height = ((CGFloat) options.sizeY) * pixelsToPointsFactor
+        };
+
+        NSWindowStyleMask style =
+            NSWindowStyleMaskTitled |
+            NSWindowStyleMaskClosable |
+            NSWindowStyleMaskResizable |
+            NSWindowStyleMaskMiniaturizable;
 
         NSWindow* nativeWindow = [NSWindow alloc];
 
-        nativeWindow = [nativeWindow initWithContentRect:rect
+        nativeWindow = [nativeWindow initWithContentRect:tgtFrame
                                                styleMask:style
                                                  backing:NSBackingStoreBuffered
-                                                   defer:NO];
+                                                   defer:NO
+                                                  screen:targetScreen];
 
         cstring titleStr = PNSLR_CStringFromString(options.title, PNSLR_GetAllocator_DefaultHeap());
         NSString* titleNsStr = [NSString stringWithUTF8String:titleStr];
         [nativeWindow setTitle:titleNsStr];
         [nativeWindow makeKeyAndOrderFront:nil];
+        
+        if (options.posX == 0 && options.posY == 0) // uninitialised
+        {
+            [nativeWindow center];
+        }
 
         PNSLR_FreeCString(titleStr, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
 
