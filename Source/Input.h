@@ -243,7 +243,7 @@ b8 DVRPL_DoesApplicationHaveFocus(void);
 utf8str DVRPL_GetDroppedFile(u16 fileId);
 
 //+skipreflect
-#ifdef DVRPL_IMPLEMENTATION
+#if defined(DVRPL_IMPLEMENTATION) && !defined(__cplusplus) // c-only
 
     #if PNSLR_WINDOWS
         static LRESULT CALLBACK DVRPL_Internal_WindowsInputCallback(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);

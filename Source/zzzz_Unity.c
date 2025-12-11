@@ -12,7 +12,9 @@
 #include "Dependencies/Panshilar/Source/zzzz_Unity.c"
 
 #if PNSLR_ANDROID
-    #include "Dependencies/AndroidGameActivity/UnityBuild.c"
+    PNSLR_SUPPRESS_WARN
+    #include <android_native_app_glue.c>
+    PNSLR_UNSUPPRESS_WARN
 #endif
 
 #endif//DVRPL_UNITY_C
