@@ -171,7 +171,7 @@
             PNSLR_FreeSlice(&args, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
 
             DVRPL_Internal_DisposeAndroidCmdLineArgs(argv);
-            GameActivity_finish(app->activity);
+            ANativeActivity_finish(app->activity);
         }
 
     #else

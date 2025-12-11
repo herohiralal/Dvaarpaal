@@ -185,10 +185,10 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY);
     static_assert(alignof(DVRPL_SavedWindowData) >= alignof(DVRPL_Internal_NativeSavedWindowData), "DVRPL_SavedWindowData must be aligned enough to hold DVRPL_Internal_NativeSavedWindowData.");
 
     static PNSLR_FORCEINLINE DVRPL_Internal_NativeAppHandle DVRPL_BREAK_APP_HANDLE(DVRPL_App h) { return *(DVRPL_Internal_NativeAppHandle*)&(h.handle); }
-    static PNSLR_FORCEINLINE DVRPL_App DVRPL_MAKE_APP_HANDLE(DVRPL_Internal_NativeAppHandle h) { return (DVRPL_App){.handle=*(u64*)&(h)}; }
+    static PNSLR_FORCEINLINE DVRPL_App DVRPL_MAKE_APP_HANDLE(DVRPL_Internal_NativeAppHandle h) { return *(DVRPL_App*)&(h); }
 
     static PNSLR_FORCEINLINE DVRPL_Internal_NativeWindowHandle DVRPL_BREAK_WINDOW_HANDLE(DVRPL_Window h) { return *(DVRPL_Internal_NativeWindowHandle*)&(h.handle); }
-    static PNSLR_FORCEINLINE DVRPL_Window DVRPL_MAKE_WINDOW_HANDLE(DVRPL_Internal_NativeWindowHandle h) { return (DVRPL_Window){.handle=*(u64*)&(h)}; }
+    static PNSLR_FORCEINLINE DVRPL_Window DVRPL_MAKE_WINDOW_HANDLE(DVRPL_Internal_NativeWindowHandle h) { return *(DVRPL_Window*)&(h); }
 
     static PNSLR_FORCEINLINE DVRPL_Internal_NativeSavedWindowData DVRPL_BREAK_SAVED_WINDOW_DATA(DVRPL_SavedWindowData d) { return *(DVRPL_Internal_NativeSavedWindowData*)&(d.buffer); }
     static PNSLR_FORCEINLINE DVRPL_SavedWindowData DVRPL_MAKE_SAVED_WINDOW_DATA(DVRPL_Internal_NativeSavedWindowData d)

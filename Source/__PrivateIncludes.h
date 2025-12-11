@@ -19,12 +19,8 @@ PNSLR_SUPPRESS_WARN
 #endif
 
 #if PNSLR_ANDROID
-    #ifndef ANDROID_GAME_ACTIVITY_NATIVE_APP_GLUE_INCLUDED
-            #define ANDROID_GAME_ACTIVITY_NATIVE_APP_GLUE_INCLUDED
-        #include "Dependencies/AndroidGameActivity/game-activity/android_native_app_glue.h"
-    #endif
-
-    #include "Dependencies/AndroidGameActivity/game-activity/GameActivityEvents.h"
+    #include <android_native_app_glue.h>
+    #include <android/window.h>
 #endif
 
 #if PNSLR_APPLE && defined(__OBJC__)
