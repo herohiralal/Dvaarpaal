@@ -9,7 +9,7 @@
 #include "Input.c"
 #include "EntryPoint.c"
 
-#include "Dependencies/Panshilar/Source/zzzz_Unity.c"
+#include "../../Panshilar/Source/zzzz_Unity.c"
 
 #if PNSLR_ANDROID
     PNSLR_SUPPRESS_WARN

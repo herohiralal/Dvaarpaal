@@ -6,7 +6,7 @@
     #include "__PrivateIncludes.h"
 #endif
 
-#include "Dependencies/Panshilar/Source/Panshilar.h"
+#include "../../Panshilar/Source/Panshilar.h"
 
 //-skipreflect
 #endif // DVRPL_ENTRY_H ============================================================

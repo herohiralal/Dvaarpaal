@@ -1,7 +1,7 @@
 #ifndef DVRPL_PRIVATE_INLCUDES_H
 #define DVRPL_PRIVATE_INLCUDES_H
 
-#include "Dependencies/Panshilar/Source/__PrivateIncludes.h"
+#include "../../Panshilar/Source/__PrivateIncludes.h"
 
 PNSLR_SUPPRESS_WARN
 
