@@ -67,8 +67,8 @@ DVRPL_WindowData DVRPL_CreateWindow(DVRPL_WindowCreationOptions options)
         {
             .left   = (LONG) options.posX,
             .top    = (LONG) options.posY,
-            .right  = (LONG) options.sizeX,
-            .bottom = (LONG) options.sizeY
+            .right  = (LONG) options.posX + (LONG) options.sizeX,
+            .bottom = (LONG) options.posY + (LONG) options.sizeY
         };
         DWORD style = options.parent.handle == 0 ? WS_OVERLAPPEDWINDOW : (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME);
 
