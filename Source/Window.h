@@ -136,6 +136,13 @@ b8 DVRPL_GetPtrPosFromWindow(DVRPL_Window window, i16* posX, i16* posY);
  */
 b8 DVRPL_GetPtrPos(i16* posX, i16* posY);
 
+/**
+ * Changes the window's name, if possible to do so.
+ * Returns true on success, false on failure.
+ * Not thread-safe.
+ */
+b8 DVRPL_RenameWindow(DVRPL_Window window, utf8str newName);
+
 //+skipreflect
 #ifdef DVRPL_IMPLEMENTATION
     #if PNSLR_WINDOWS

@@ -313,4 +313,26 @@ b8 DVRPL_GetPtrPos(i16* posX, i16* posY)
         #error "Unimplemented."
     #endif
 }
+
+b8 DVRPL_RenameWindow(DVRPL_Window window, utf8str newName)
+{
+    if (DVRPL_BREAK_WINDOW_HANDLE(window) == DVRPL_Internal_InvalidWindowHandle)
+        return false;
+
+    #if PNSLR_WINDOWS
+    {
+        PNSLR_ArraySlice(u16) newNameW = PNSLR_UTF16FromUTF8WindowsOnly(newName, PNSLR_GetAllocator_DefaultHeap());
+        b8 output = !!SetWindowTextW(DVRPL_BREAK_WINDOW_HANDLE(window), (LPCWSTR) newNameW.data);
+        PNSLR_FreeSlice(&newNameW, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
+        return output;
+    }
+    #elif PNSLR_ANDROID
+    {
+        return false;
+    }
+    #else
+        #error "Unimplemented."
+    #endif
+}
+
 #endif
