@@ -208,7 +208,7 @@ b8 DVRPL_SetFullScreen(DVRPL_WindowData* window, b8 status, i16* posX, i16* posY
             y = (i16) savedData.rect.top;
             w = (u16)(savedData.rect.right  - savedData.rect.left);
             h = (u16)(savedData.rect.bottom - savedData.rect.top);
-            SetWindowPos(windowHandle, HWND_TOPMOST, (LONG) x, (LONG) y, (LONG) w, (LONG) h, SWP_FRAMECHANGED);
+            SetWindowPos(windowHandle, HWND_NOTOPMOST, (LONG) x, (LONG) y, (LONG) w, (LONG) h, SWP_FRAMECHANGED);
         }
     }
     #elif PNSLR_ANDROID
