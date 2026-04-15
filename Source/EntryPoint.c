@@ -21,7 +21,9 @@
                 WCHAR* arg = argv[i];
                 i64    len = 0;
                 while (arg[len] != L'\0') len++;
-                args.data[i] = PNSLR_MakeString(len, false, PNSLR_GetAllocator_DefaultHeap(), PNSLR_GET_LOC(), nil);
+                len++; // count null term
+                PNSLR_ArraySlice(u16) utf16Str = (PNSLR_ArraySlice(u16)) {.data = (u16*) arg, .count = (i64) len};
+                args.data[i] = PNSLR_UTF8FromUTF16WindowsOnly(utf16Str, PNSLR_GetAllocator_DefaultHeap());
                 if (!args.data[i].data || !args.data[i].count) return -1;
             }
 
